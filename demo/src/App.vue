@@ -2,8 +2,8 @@
   <v-app>
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+        <span>Resolved |</span>
+        <span class="font-weight-light"> Automated Account Reconciliation</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
@@ -21,18 +21,23 @@
   </v-app>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld';
+<script lang="ts">
+import { Prop, Component, Vue } from 'vue-property-decorator';
+import HelloWorld from './components/HelloWorld.vue';
 
-export default {
-  name: 'App',
+@Component({
   components: {
     HelloWorld,
   },
-  data() {
-    return {
-      //
-    };
-  },
-};
+})
+export default class App extends Vue {
+}
 </script>
+
+<style lang="scss">
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+</style>
