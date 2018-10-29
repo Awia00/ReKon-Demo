@@ -26,22 +26,31 @@
     </v-navigation-drawer>
     
     <v-content>
-      <HelloWorld/>
+      <v-layout row>
+        <Account v-bind:account="accounts[0]"/>
+        <Account v-bind:account="accounts[1]"/>
+      </v-layout>
     </v-content>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import Account from './components/Account.vue';
+import { Account as AccountModel } from './models/Account';
+import { Transaction } from '@/models/Transaction';
 
 @Component({
   components: {
-    HelloWorld,
+    Account,
   },
 })
 export default class App extends Vue {
   private drawer: boolean = false;
+  private accounts: AccountModel[] = [
+    new AccountModel('Internal Ledger', [new Transaction(), new Transaction()]),
+    new AccountModel('Bank Account', [new Transaction()]),
+  ];
 }
 </script>
 

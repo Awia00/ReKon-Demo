@@ -1,4 +1,4 @@
-export default class Transaction {
+export class Transaction {
     public Id: string;
     public Value: number;
     public Date: Date;

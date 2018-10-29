@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>{{accountName}}</h1>
+    <h1>{{account.Title}}</h1>
      <v-data-table
       :headers="headers"
       :items="transactions"
@@ -19,21 +19,18 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import Transaction from '../models/Transaction';
+import { Transaction } from '../models/Transaction';
+import { Account as AccountModel } from '../models/Account';
 
-@Component({
-  components: {
-  },
-})
+@Component({})
 export default class Account extends Vue {
-  @Prop()
-  public accountName: string = '';
+  @Prop(AccountModel)
+  private account!: AccountModel;
 
-  private headers = Object.keys(Transaction).forEach((element) => {
-    return element;
+  private headers = Object.keys(new Transaction()).map((prop) => {
+    return {text: prop, value: prop};
   });
-
-  private transactions = [new Transaction(), new Transaction()];
+  private transactions = this.account.Transactions;
 }
 </script>
 
