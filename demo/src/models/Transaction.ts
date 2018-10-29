@@ -4,10 +4,12 @@ export class Transaction {
     public Date: Date;
     public Text: string;
 
-    constructor() {
-        this.Id = '';
-        this.Value = 0;
-        this.Date = new Date();
-        this.Text = '';
+    constructor();
+    constructor(id: string, value: number, date: Date, text: string);
+    constructor(id?: string, value?: number, date?: Date, text?: string) {
+        this.Id = id ? id : '';
+        this.Value = value ? value : 0;
+        this.Date = date ? date : new Date();
+        this.Text = text ? text : '';
     }
 }
