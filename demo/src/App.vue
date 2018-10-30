@@ -47,10 +47,11 @@ import { Transaction } from '@/models/Transaction';
 })
 export default class App extends Vue {
   private drawer: boolean = false;
-  private accounts: AccountModel[] = [
-    new AccountModel('Internal Ledger', [new Transaction(), new Transaction()]),
-    new AccountModel('Bank Account', [new Transaction()]),
-  ];
+
+  get accounts(): AccountModel[] {
+    const result = this.$store.state.account.accounts;
+    return result ? result : [];
+  }
 }
 </script>
 
