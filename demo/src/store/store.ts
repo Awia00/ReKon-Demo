@@ -1,13 +1,14 @@
 import Vue from 'vue';
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex';
 import { account } from './modules/account';
+import { Matching } from '@/models/Matching';
 
 Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== 'production';
 
 export class State {
-  public title: string = 'lol';
+  public matching: Matching = new Matching();
 }
 
 const getterTree: GetterTree<State, any> = {};

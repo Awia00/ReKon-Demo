@@ -26,9 +26,18 @@
     </v-navigation-drawer>
     
     <v-content>
-      <v-layout row>
-        <Account v-bind:account="accounts[0]"/>
-        <Account v-bind:account="accounts[1]"/>
+      <v-layout column fill-height justify-space-between>
+        <v-layout align-start justify-center row>
+          <v-flex>
+            <Account v-bind:account="accounts[0]"/>
+          </v-flex>
+          <v-flex>
+            <Account v-bind:account="accounts[1]"/>
+          </v-flex>
+        </v-layout>
+        <v-flex>
+          <Matching v-bind:matching="matching"></Matching>
+        </v-flex>
       </v-layout>
     </v-content>
   </v-app>
@@ -36,13 +45,16 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import Account from './components/Account.vue';
-import { Account as AccountModel } from './models/Account';
+import Account from '@/components/Account.vue';
+import Matching from '@/components/Matching.vue';
+import { Account as AccountModel } from '@/models/Account';
+import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
 
 @Component({
   components: {
     Account,
+    Matching,
   },
 })
 export default class App extends Vue {
@@ -51,6 +63,11 @@ export default class App extends Vue {
   get accounts(): AccountModel[] {
     const result = this.$store.state.account.accounts;
     return result ? result : [];
+  }
+
+  get matching(): MatchingModel {
+    const result = this.$store.state.matching;
+    return result;
   }
 }
 </script>

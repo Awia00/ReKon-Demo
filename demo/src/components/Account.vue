@@ -35,5 +35,4 @@ export default class Account extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
 </style>
