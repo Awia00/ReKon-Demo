@@ -4,16 +4,13 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
         <span>Resolved |</span>
-        <span class="font-weight-light"> Automated Account Reconciliation</span>
+        <span class="font-weight-light">Automated Account Reconciliation</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-       <v-btn
-          icon
-        >
-          <v-icon>more_vert</v-icon>
-        </v-btn>
+      <v-btn icon>
+        <v-icon>more_vert</v-icon>
+      </v-btn>
     </v-toolbar>
-
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list-tile>
         <v-list-tile-content>
@@ -30,6 +27,11 @@
           </v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-content>
+          <CreateAccount/>
+        </v-list-tile-content>
+      </v-list-tile>
       <v-divider></v-divider>
       <v-list-tile>
         <v-list-tile-content>
@@ -38,8 +40,12 @@
           </v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-content>
+          <CreateMatching/>
+        </v-list-tile-content>
+      </v-list-tile>
     </v-navigation-drawer>
-    
     <v-content>
       <v-layout column fill-height justify-space-between>
         <v-layout align-start justify-center row>
@@ -60,7 +66,9 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
+import CreateAccount from '@/components/CreateAccount.vue';
 import ViewAccount from '@/components/ViewAccount.vue';
+import CreateMatching from '@/components/CreateMatching.vue';
 import ViewMatching from '@/components/ViewMatching.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
@@ -68,7 +76,9 @@ import { Transaction } from '@/models/Transaction';
 
 @Component({
   components: {
+    CreateAccount,
     ViewAccount,
+    CreateMatching,
     ViewMatching,
   },
 })

@@ -1,39 +1,49 @@
 <template>
-  <v-container>
-    <h1>{{matching.Id}}</h1>
-     <v-data-table
-      :headers="headers"
-      :items="matches"
-      hide-actions
-      class="elevation-1"
-    >
-      <template slot="items" slot-scope="props">
-        <td>{{ props.item.Id }}</td>
-        <td>{{ props.item.Transactions.map(x => x.id) }}</td>
-      </template>
-    </v-data-table>
-  </v-container>
+  <div>
+    <v-btn @click="dialog = true">Create Matching</v-btn>
+    <v-dialog v-model="dialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Matching</v-card-title>
+        <v-card-text>
+          <p>You can pick different import formats.</p>
+          <v-text-field label="Title" v-bind="title"></v-text-field>
+          <p>Flag the accounts you want to reconcile</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat="flat" @click="dialog = false">Cancel</v-btn>
+          <v-btn color="green darken-1" flat="flat" @click="create()">Create</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction as TransactionModel } from '@/models/Transaction';
+import { Account as AccountModel } from '@/models/Account';
 
+type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({})
 export default class CreateMatching extends Vue {
-  @Prop(MatchingModel)
-  private matching!: MatchingModel;
+    public dialog: boolean = false;
+    public title: string = '';
+    public inputType: string = '';
+    public items: Array<{ title: inputType}> = [
+        { title: 'Manual' },
+        { title: 'Excel' },
+        { title: 'Upload' },
+    ];
 
-  private headers = Object.keys(new MatchingModel()).map((prop) => {
-    return {text: prop, value: prop};
-  });
-  private matches = this.matching.Matches;
+    private changeType(type: inputType) {
+        this.inputType = type;
+    }
 
-  private getListOfIds(transactions: TransactionModel[]): string {
-    const result = transactions.reduce((state, curr) => state + curr.Id + ', ', '');
-    return result;
-  }
+    private create() {
+        this.dialog = false;
+        return;
+    }
 }
 </script>
 

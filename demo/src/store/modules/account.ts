@@ -5,8 +5,8 @@ import { Transaction } from '@/models/Transaction';
 
 export class State {
     public accounts: AccountModel[] = [
-        new AccountModel('Internal Ledger', [new Transaction(), new Transaction()]),
-        new AccountModel('Bank Account', [new Transaction()]),
+        new AccountModel('Internal Ledger', [new Transaction(), new Transaction()], true),
+        new AccountModel('Bank Account', [new Transaction()], false),
     ];
 }
 
