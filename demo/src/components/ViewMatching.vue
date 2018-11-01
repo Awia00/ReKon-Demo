@@ -18,10 +18,10 @@
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Matching as MatchingModel } from '../models/Matching';
-import { Transaction } from '@/models/Transaction';
+import { Transaction as TransactionModel} from '@/models/Transaction';
 
 @Component({})
-export default class Matching extends Vue {
+export default class ViewMatching extends Vue {
   @Prop(MatchingModel)
   private matching!: MatchingModel;
 
@@ -30,7 +30,7 @@ export default class Matching extends Vue {
   });
   private matches = this.matching.Matches;
 
-  private getListOfIds(transactions: Transaction[]): string {
+  private getListOfIds(transactions: TransactionModel[]): string {
     const result = transactions.reduce((state, curr) => state + curr.Id + ', ', '');
     return result;
   }

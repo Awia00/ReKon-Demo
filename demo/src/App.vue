@@ -18,25 +18,40 @@
       <v-list-tile>
         <v-list-tile-content>
           <v-list-tile-title>
-            <span>Menu</span>
+            <h2>Menu</h2>
           </v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-divider></v-divider>
+      <v-list-tile>
+        <v-list-tile-content>
+          <v-list-tile-title>
+            <h2>Accounts</h2>
+          </v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-divider></v-divider>
+      <v-list-tile>
+        <v-list-tile-content>
+          <v-list-tile-title>
+            <h2>Matchings</h2>
+          </v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
     </v-navigation-drawer>
     
     <v-content>
       <v-layout column fill-height justify-space-between>
         <v-layout align-start justify-center row>
           <v-flex>
-            <Account v-bind:account="accounts[0]"/>
+            <ViewAccount v-bind:account="accounts[0]"/>
           </v-flex>
           <v-flex>
-            <Account v-bind:account="accounts[1]"/>
+            <ViewAccount v-bind:account="accounts[1]"/>
           </v-flex>
         </v-layout>
         <v-flex>
-          <Matching v-bind:matching="matching"></Matching>
+          <ViewMatching v-bind:matching="matching"/>
         </v-flex>
       </v-layout>
     </v-content>
@@ -45,16 +60,16 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import Account from '@/components/Account.vue';
-import Matching from '@/components/Matching.vue';
+import ViewAccount from '@/components/Account.vue';
+import ViewMatching from '@/components/Matching.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
 
 @Component({
   components: {
-    Account,
-    Matching,
+    ViewAccount,
+    ViewMatching,
   },
 })
 export default class App extends Vue {
