@@ -60,8 +60,8 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import ViewAccount from '@/components/Account.vue';
-import ViewMatching from '@/components/Matching.vue';
+import ViewAccount from '@/components/ViewAccount.vue';
+import ViewMatching from '@/components/ViewMatching.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
