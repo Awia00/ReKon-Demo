@@ -3,7 +3,7 @@
     <v-toolbar app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Resolved |</span>
+        <span>Resolved |&nbsp;</span>
         <span class="font-weight-light">Automated Account Reconciliation</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
