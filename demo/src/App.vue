@@ -49,10 +49,10 @@
     <v-content>
       <v-layout column fill-height justify-space-between>
         <v-layout align-start justify-center row>
-          <v-flex>
+          <v-flex v-if="accounts[0]">
             <ViewAccount v-bind:account="accounts[0]"/>
           </v-flex>
-          <v-flex>
+          <v-flex v-if="accounts[1]">
             <ViewAccount v-bind:account="accounts[1]"/>
           </v-flex>
         </v-layout>

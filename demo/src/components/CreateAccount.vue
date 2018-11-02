@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-btn @click="dialog = true">Create Account</v-btn>
-        <v-dialog v-model="dialog" max-width="600">
+        <v-dialog scrollable v-model="dialog" max-width="600">
             <v-card>
                 <v-toolbar dark color="primary">
                     <v-toolbar-title>Account</v-toolbar-title>
@@ -12,58 +12,72 @@
                         <v-btn :value="2" flat @click="type = 'Upload'">Upload</v-btn>
                     </v-btn-toggle>
                 </v-toolbar>
-                <v-card-text>
-                    <v-layout row>
+                <v-card-text style="height: 650px">
+                    <v-layout column>
                         <v-flex>
-                            <v-text-field label="Title" v-model="title"></v-text-field>
-                        </v-flex>
-                        <v-flex>
-                            <v-switch :label="'Internal'" v-model="internal"></v-switch>
-                        </v-flex>
-                    </v-layout>
-                    <div v-if="type==='Manual'">
-                        <v-flex>
-                            <p>Input your data at the table below</p>
                             <v-layout row>
-                                <v-flex xs12 sm6 md3>
-                                    <v-text-field label="Id" v-model="manualTransaction.Id"></v-text-field>
+                                <v-flex>
+                                    <v-text-field label="Title" v-model="title"></v-text-field>
                                 </v-flex>
-                                <v-flex xs12 sm6 md3>
-                                    <v-text-field
-                                        label="Value"
-                                        :mask="'#######'"
-                                        v-model="manualTransaction.Value"
-                                    ></v-text-field>
-                                </v-flex>
-                                <v-flex xs12 sm6 md3>
-                                    <v-text-field label="Text" v-model="manualTransaction.Text"></v-text-field>
-                                </v-flex>
-                                <v-flex xs12 sm6 md3>
-                                    <v-text-field
-                                        label="Date"
-                                        :mask="'date-with-time'"
-                                        v-model="manualTransaction.Date"
-                                    ></v-text-field>
-                                </v-flex>
-                                <v-flex xs12 sm6 md3>
-                                    <v-btn @click="addManualTransaction()">Add</v-btn>
+                                <v-flex>
+                                    <v-switch :label="'Is internal'" v-model="internal"></v-switch>
                                 </v-flex>
                             </v-layout>
+                            <div v-if="type==='Manual'">
+                                <v-flex>
+                                    <p>Input your data at the table below</p>
+                                    <v-layout row>
+                                        <v-flex xs12 sm6 md3>
+                                            <v-text-field label="Id" v-model="manualTransaction.Id"></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md3>
+                                            <v-text-field
+                                                label="Value"
+                                                :mask="'#######'"
+                                                v-model="manualTransaction.Value"
+                                            ></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md3>
+                                            <v-text-field
+                                                label="Text"
+                                                v-model="manualTransaction.Text"
+                                            ></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md3>
+                                            <v-text-field
+                                                label="Date"
+                                                :mask="'date-with-time'"
+                                                v-model="manualTransaction.Date"
+                                            ></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md3>
+                                            <v-btn @click="addManualTransaction()">Add</v-btn>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-flex>
+                            </div>
+                            <div v-if="type==='Excel'">Excel</div>
+                            <div v-if="type==='Upload'">Upload</div>
                         </v-flex>
-                    </div>
-                    <div v-if="type==='Excel'">Excel</div>
-                    <div v-if="type==='Upload'">Upload</div>
-                    <v-divider></v-divider>
-                    <h2>Transactions</h2>
-                    <v-data-table :headers="headers" :items="transactions">
-                        <template slot="items" slot-scope="props">
-                            <td>{{ props.item.Id }}</td>
-                            <td>{{ props.item.Value }}</td>
-                            <td>{{ props.item.Date }}</td>
-                            <td>{{ props.item.Text }}</td>
-                        </template>
-                    </v-data-table>
+                        <v-divider></v-divider>
+                        <v-flex align-content-start justify-start>
+                            <h2>Transactions</h2>
+                            <v-data-table :headers="headers" :items="transactions">
+                                <template slot="items" slot-scope="props">
+                                    <td>{{ props.item.Id }}</td>
+                                    <td>{{ props.item.Value }}</td>
+                                    <td>{{ props.item.Date }}</td>
+                                    <td>{{ props.item.Text }}</td>
+                                </template>
+                            </v-data-table>
+                        </v-flex>
+                    </v-layout>
                 </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="cancel()">Cancel</v-btn>
+                    <v-btn @click="create()" color="primary">Create</v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
     </div>
@@ -78,17 +92,21 @@ import { mapActions } from 'vuex';
 type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({})
 export default class CreateAccount extends Vue {
+    // UI
     public dialog: boolean = false;
     public toggle: number = 0;
     public type: inputType = 'Manual';
+    public headers = Object.keys(new TransactionModel()).map((prop) => {
+        return {text: prop, value: prop};
+    });
+
+    // MODEL
     public title: string = '';
     public internal: boolean = true;
     public transactions: TransactionModel[] = [];
     public manualTransaction =  { Id: '', Value: 0, Date: new Date(), Text: '' };
-    private headers = Object.keys(new TransactionModel()).map((prop) => {
-        return {text: prop, value: prop};
-    });
 
+    // METHODS
     private async addManualTransaction() {
         this.transactions.push(new TransactionModel(
             this.manualTransaction.Id,
@@ -102,12 +120,22 @@ export default class CreateAccount extends Vue {
         this.manualTransaction.Text = '';
     }
 
+    private async cancel() {
+        this.dialog = false;
+        this.transactions = [];
+        this.title = '';
+        this.internal = true;
+    }
+
     private async create() {
         await this.$store.dispatch(
-            'account/CreateAccout',
+            'account/addAccount',
             new AccountModel(this.title, this.transactions, this.internal));
 
         this.dialog = false;
+        this.transactions = [];
+        this.title = '';
+        this.internal = true;
         return;
     }
 }
