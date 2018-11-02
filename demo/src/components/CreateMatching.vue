@@ -8,10 +8,11 @@
           <p>You can pick different import formats.</p>
           <v-text-field label="Title" v-bind="title"></v-text-field>
           <p>Flag the accounts you want to reconcile</p>
+          <v-list></v-list>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat="flat" @click="dialog = false">Cancel</v-btn>
+          <v-btn color="green darken-1" flat="flat" @click="cancel()">Cancel</v-btn>
           <v-btn color="green darken-1" flat="flat" @click="create()">Create</v-btn>
         </v-card-actions>
       </v-card>
@@ -38,6 +39,10 @@ export default class CreateMatching extends Vue {
 
     private changeType(type: inputType) {
         this.inputType = type;
+    }
+
+    private cancel() {
+      this.dialog = false;
     }
 
     private create() {
