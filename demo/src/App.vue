@@ -56,8 +56,8 @@
             <ViewAccount v-bind:account="accounts[1]"/>
           </v-flex>
         </v-layout>
-        <v-flex>
-          <ViewMatching v-bind:matching="matching"/>
+        <v-flex v-if="matchings.length >= 1">
+          <ViewMatching v-bind:matching="matchings[0]"/>
         </v-flex>
       </v-layout>
     </v-content>
@@ -90,9 +90,9 @@ export default class App extends Vue {
     return result ? result : [];
   }
 
-  get matching(): MatchingModel {
-    const result = this.$store.state.matching;
-    return result;
+  get matchings(): MatchingModel[] {
+    const result = this.$store.state.matching.matchings;
+    return result ? result : [];
   }
 }
 </script>

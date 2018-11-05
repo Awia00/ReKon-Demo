@@ -8,8 +8,8 @@ export class Account {
     constructor();
     constructor(title: string, transactions: Transaction[], internal: boolean);
     constructor(title?: string, transactions?: Transaction[], internal?: boolean) {
-        this.Title = title ? title : '';
-        this.Transactions = transactions ? transactions : [];
-        this.Internal = internal ? internal : true;
+        this.Title = title !== undefined ? title : '';
+        this.Transactions = transactions !== undefined ? transactions : [];
+        this.Internal = internal !== undefined ? internal : true;
     }
 }

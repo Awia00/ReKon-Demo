@@ -1,19 +1,35 @@
 <template>
   <div>
-    <v-btn @click="dialog = true">Create Matching</v-btn>
-    <v-dialog v-model="dialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">Matching</v-card-title>
+    <v-btn @click="open()">Create Matching</v-btn>
+    <v-dialog v-model="dialog" max-width="500" scrollable>
+      <v-card height="500">
+        <v-toolbar dark color="primary">
+          <v-toolbar-title>Matching</v-toolbar-title>
+        </v-toolbar>
         <v-card-text>
-          <p>You can pick different import formats.</p>
           <v-text-field label="Title" v-bind="title"></v-text-field>
+          <h2>Accounts</h2>
           <p>Flag the accounts you want to reconcile</p>
+          <v-list two-line subheader>
+            <template v-for="(item, index) in accounts">
+              <v-list-tile :key="index">
+                <v-list-tile-action>
+                  <v-checkbox v-model="item.checked"></v-checkbox>
+                </v-list-tile-action>
+                <v-list-tile-content>
+                  <v-list-tile-title v-html="item.account.Title"></v-list-tile-title>
+                  <v-list-tile-sub-title v-if="item.account.Internal">Internal</v-list-tile-sub-title>
+                  <v-list-tile-sub-title v-else>External</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
+          </v-list>
           <v-list></v-list>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat="flat" @click="cancel()">Cancel</v-btn>
-          <v-btn color="green darken-1" flat="flat" @click="create()">Create</v-btn>
+          <v-btn @click="cancel()">Cancel</v-btn>
+          <v-btn color="primary" @click="create()">Create</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -24,30 +40,32 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Account as AccountModel } from '@/models/Account';
+import { Matching as MatchingModel } from '@/models/Matching';
 
-type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({})
 export default class CreateMatching extends Vue {
     public dialog: boolean = false;
     public title: string = '';
-    public inputType: string = '';
-    public items: Array<{ title: inputType}> = [
-        { title: 'Manual' },
-        { title: 'Excel' },
-        { title: 'Upload' },
-    ];
+    public accounts: Array<{account: AccountModel, checked: boolean}> = [];
 
-    private changeType(type: inputType) {
-        this.inputType = type;
+    private open() {
+      this.accounts = this.$store.state.account.accounts.map((a: AccountModel) => {
+        return { account: a, checked: false };
+      });
+      this.dialog = true;
     }
 
     private cancel() {
       this.dialog = false;
     }
 
-    private create() {
-        this.dialog = false;
-        return;
+    private async create() {
+      const toSave = this.accounts.filter((a) => a.checked).map((a) => a.account);
+      await this.$store.dispatch(
+            'matching/addMatching',
+            new MatchingModel(this.title, toSave, []));
+      this.dialog = false;
+      return;
     }
 }
 </script>
