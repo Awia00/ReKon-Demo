@@ -46,7 +46,7 @@
                                         <v-flex xs12 sm6 md3>
                                             <v-text-field
                                                 label="Date"
-                                                :mask="'date-with-time'"
+                                                :mask="'####-##-## ##:##:##'"
                                                 v-model="manualTransaction.Date"
                                             ></v-text-field>
                                         </v-flex>
@@ -71,7 +71,10 @@
                                 <template slot="items" slot-scope="props">
                                     <td>{{ props.item.Id }}</td>
                                     <td>{{ props.item.Value }}</td>
-                                    <td>{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
+                                    <td
+                                        v-if="props.item.Date"
+                                    >{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
+                                    <td v-else></td>
                                     <td>{{ props.item.Text }}</td>
                                 </template>
                             </v-data-table>
@@ -94,6 +97,7 @@ import FileUpload from './FileUpload.vue';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Account as AccountModel } from '@/models/Account';
 import { mapActions } from 'vuex';
+import moment from 'moment';
 
 type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({
@@ -114,7 +118,7 @@ export default class CreateAccount extends Vue {
     public title: string = '';
     public internal: boolean = true;
     public transactions: TransactionModel[] = [];
-    public manualTransaction =  { Id: '', Value: 0, Date: new Date(), Text: '' };
+    public manualTransaction =  { Id: '', Value: 0, Date: '', Text: '' };
 
     // METHODS
     private async fileResult(data: any[]) {
@@ -124,15 +128,21 @@ export default class CreateAccount extends Vue {
     }
 
     private async addManualTransaction() {
+        const year: number = parseInt(this.manualTransaction.Date.substring(0, 4), 10);
+        const month: number = parseInt(this.manualTransaction.Date.substring(4, 6), 10);
+        const day: number = parseInt(this.manualTransaction.Date.substring(6, 8), 10);
+        const hour: number = parseInt(this.manualTransaction.Date.substring(8, 10), 10);
+        const min: number = parseInt(this.manualTransaction.Date.substring(10, 12), 10);
+        const seconds: number = parseInt(this.manualTransaction.Date.substring(12, 14), 10);
         this.transactions.push(new TransactionModel(
             this.manualTransaction.Id,
             this.manualTransaction.Value,
-            this.manualTransaction.Date,
+            new Date(year, month, day, hour, min, seconds),
             this.manualTransaction.Text,
         ));
         this.manualTransaction.Id = '';
         this.manualTransaction.Value = 0;
-        this.manualTransaction.Date = new Date();
+        this.manualTransaction.Date = '';
         this.manualTransaction.Text = '';
     }
 
