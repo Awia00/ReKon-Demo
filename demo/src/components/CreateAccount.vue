@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-btn @click="dialog = true">Create Account</v-btn>
+        <v-btn @click="open()">Create Account</v-btn>
         <v-dialog scrollable v-model="dialog" max-width="600">
             <v-card>
                 <v-toolbar dark color="primary">
@@ -56,8 +56,13 @@
                                     </v-layout>
                                 </v-flex>
                             </div>
-                            <div v-if="type==='Excel'">Excel</div>
-                            <div v-if="type==='Upload'">Upload</div>
+                            <div v-if="type==='Excel'">
+                                <p>Excel is not supported yet</p>
+                            </div>
+                            <div v-if="type==='Upload'">
+                                <h2>Upload</h2>
+                                <FileUpload v-on:fileResult="fileResult($event)"/>
+                            </div>
                         </v-flex>
                         <v-divider></v-divider>
                         <v-flex align-content-start justify-start>
@@ -66,7 +71,7 @@
                                 <template slot="items" slot-scope="props">
                                     <td>{{ props.item.Id }}</td>
                                     <td>{{ props.item.Value }}</td>
-                                    <td>{{ props.item.Date }}</td>
+                                    <td>{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
                                     <td>{{ props.item.Text }}</td>
                                 </template>
                             </v-data-table>
@@ -85,12 +90,17 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
+import FileUpload from './FileUpload.vue';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Account as AccountModel } from '@/models/Account';
 import { mapActions } from 'vuex';
 
 type inputType = 'Manual' | 'Excel' | 'Upload';
-@Component({})
+@Component({
+    components: {
+        FileUpload,
+    },
+})
 export default class CreateAccount extends Vue {
     // UI
     public dialog: boolean = false;
@@ -107,6 +117,12 @@ export default class CreateAccount extends Vue {
     public manualTransaction =  { Id: '', Value: 0, Date: new Date(), Text: '' };
 
     // METHODS
+    private async fileResult(data: any[]) {
+        this.transactions = data.map((dp) => {
+            return TransactionModel.parse(dp);
+        });
+    }
+
     private async addManualTransaction() {
         this.transactions.push(new TransactionModel(
             this.manualTransaction.Id,
@@ -120,11 +136,16 @@ export default class CreateAccount extends Vue {
         this.manualTransaction.Text = '';
     }
 
-    private async cancel() {
-        this.dialog = false;
+    private open() {
+        this.dialog = true;
         this.transactions = [];
         this.title = '';
         this.internal = true;
+        this.type = 'Manual';
+    }
+
+    private cancel() {
+        this.dialog = false;
     }
 
     private async create() {

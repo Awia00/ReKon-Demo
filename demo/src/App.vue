@@ -57,6 +57,9 @@
           </v-flex>
         </v-layout>
         <v-flex v-if="matchings.length >= 1">
+          <v-layout align-center justify-center>
+            <v-btn dark color="primary">Reconcile</v-btn>
+          </v-layout>
           <ViewMatching v-bind:matching="matchings[0]"/>
         </v-flex>
       </v-layout>
@@ -93,6 +96,10 @@ export default class App extends Vue {
   get matchings(): MatchingModel[] {
     const result = this.$store.state.matching.matchings;
     return result ? result : [];
+  }
+
+  private async reconcile() {
+    return;
   }
 }
 </script>
