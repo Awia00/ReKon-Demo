@@ -3,12 +3,13 @@ export class Match {
     private static IdCounter: number = 0;
 
     public Id: string;
-    public Transactions: Transaction[];
+    public TransactionIds: number[];
 
     constructor();
-    constructor(id: string, transactions: Transaction[]);
-    constructor(id?: string, transactions?: Transaction[]) {
+    // tslint:disable-next-line:unified-signatures
+    constructor(transactionsIds?: number[]);
+    constructor(transactionsIds?: number[], id?: string) {
         this.Id = id ? id : 'Match' + (Match.IdCounter++).toString();
-        this.Transactions = transactions ? transactions : [];
+        this.TransactionIds = transactionsIds ? transactionsIds : [];
     }
 }

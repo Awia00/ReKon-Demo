@@ -3,14 +3,17 @@ import { Match } from './Match';
 export class Matching {
     private static IdCounter: number = 0;
 
-    public Id: string;
+    public Guuid: string | undefined;
+    public Id: number;
+    public Title: string;
     public Matches: Match[];
     public Accounts: ReadonlyArray<Account>;
 
     constructor();
-    constructor(id: string, accounts: ReadonlyArray<Account>, matches: Match[]);
-    constructor(id?: string, accounts?: ReadonlyArray<Account>, matches?: Match[]) {
-        this.Id = id ? id : 'Matching ' + (Matching.IdCounter++).toString();
+    constructor(title: string, accounts: ReadonlyArray<Account>, matches: Match[]);
+    constructor(title?: string, accounts?: ReadonlyArray<Account>, matches?: Match[]) {
+        this.Id = Matching.IdCounter++;
+        this.Title = title ? title : 'Matching ' + (this.Id);
         this.Accounts = accounts ? accounts : [];
         this.Matches = matches ? matches : [];
     }

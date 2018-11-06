@@ -49,7 +49,7 @@ export default class CreateMatching extends Vue {
     public accounts: Array<{account: AccountModel, checked: boolean}> = [];
 
     private open() {
-      this.accounts = this.$store.state.account.accounts.map((a: AccountModel) => {
+      this.accounts = this.$store.getters['account/accountSet'].map((a: AccountModel) => {
         return { account: a, checked: false };
       });
       this.dialog = true;

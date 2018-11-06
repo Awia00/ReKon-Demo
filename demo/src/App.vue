@@ -58,7 +58,7 @@
         </v-layout>
         <v-flex v-if="matchings.length >= 1">
           <v-layout align-center justify-center>
-            <v-btn dark color="primary">Reconcile</v-btn>
+            <v-btn dark color="primary" @click="reconcile()">Reconcile</v-btn>
           </v-layout>
           <ViewMatching v-bind:matching="matchings[0]"/>
         </v-flex>
@@ -76,6 +76,7 @@ import ViewMatching from '@/components/ViewMatching.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
+import { setTimeout, setInterval } from 'timers';
 
 @Component({
   components: {
@@ -89,16 +90,17 @@ export default class App extends Vue {
   private drawer: boolean = false;
 
   get accounts(): AccountModel[] {
-    const result = this.$store.state.account.accounts;
+    const result = this.$store.getters['account/accountSet'];
     return result ? result : [];
   }
 
   get matchings(): MatchingModel[] {
-    const result = this.$store.state.matching.matchings;
+    const result = this.$store.getters['matching/matchingSet'];
     return result ? result : [];
   }
 
   private async reconcile() {
+    this.$store.dispatch('matching/reconcile', this.matchings[0]);
     return;
   }
 }

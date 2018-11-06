@@ -2,19 +2,23 @@ import { GetterTree, MutationTree, ActionTree, ActionContext, Module } from 'vue
 import { State as RootState } from '../store';
 import { Account as AccountModel } from '@/models/Account';
 import { Transaction } from '@/models/Transaction';
+import IdMap from '../IdMapper';
 
 export class State {
-    public accounts: AccountModel[] = [
-        new AccountModel('Internal Ledger', [new Transaction(), new Transaction()], true),
-    ];
+    public accounts: IdMap<AccountModel> = {};
+    public accountIds: string[] = [];
 }
 
 const getterTree: GetterTree<State, RootState> = {
+    accountSet(state: State): AccountModel[] {
+        return state.accountIds.map((x) => state.accounts[x]);
+    },
 };
 
 const mutationTree: MutationTree<State> = {
     addAccount(state: State, accountModel: AccountModel) {
-        state.accounts.push(accountModel);
+        state.accounts[accountModel.Id] = (accountModel);
+        state.accountIds.push(accountModel.Id.toString());
     },
 };
 

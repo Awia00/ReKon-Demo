@@ -28,9 +28,6 @@
                                     <p>Input your data at the table below</p>
                                     <v-layout row>
                                         <v-flex xs12 sm6 md3>
-                                            <v-text-field label="Id" v-model="manualTransaction.Id"></v-text-field>
-                                        </v-flex>
-                                        <v-flex xs12 sm6 md3>
                                             <v-text-field
                                                 label="Value"
                                                 :mask="'#######'"
@@ -118,7 +115,7 @@ export default class CreateAccount extends Vue {
     public title: string = '';
     public internal: boolean = true;
     public transactions: TransactionModel[] = [];
-    public manualTransaction =  { Id: '', Value: 0, Date: '', Text: '' };
+    public manualTransaction =  { Value: 0, Date: '', Text: '' };
 
     // METHODS
     private async fileResult(data: any[]) {
@@ -135,12 +132,10 @@ export default class CreateAccount extends Vue {
         const min: number = parseInt(this.manualTransaction.Date.substring(10, 12), 10);
         const seconds: number = parseInt(this.manualTransaction.Date.substring(12, 14), 10);
         this.transactions.push(new TransactionModel(
-            this.manualTransaction.Id,
             this.manualTransaction.Value,
             new Date(year, month, day, hour, min, seconds),
             this.manualTransaction.Text,
         ));
-        this.manualTransaction.Id = '';
         this.manualTransaction.Value = 0;
         this.manualTransaction.Date = '';
         this.manualTransaction.Text = '';
@@ -152,6 +147,7 @@ export default class CreateAccount extends Vue {
         this.title = '';
         this.internal = true;
         this.type = 'Manual';
+        this.toggle = 0;
     }
 
     private cancel() {
