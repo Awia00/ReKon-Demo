@@ -45,8 +45,8 @@ export default class ViewMatching extends Vue {
   }
 
   private async reconcile() {
-    this.$store.dispatch('matching/reconcile', this.matching.Id);
-    this.$store.dispatch('matching/syncSolution', this.matching.Id);
+    await this.$store.dispatch('matching/reconcile', this.matching.Id);
+    await this.$store.dispatch('matching/syncSolution', this.matching.Id);
   }
 
   private async stop() {

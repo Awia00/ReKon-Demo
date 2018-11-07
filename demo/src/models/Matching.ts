@@ -20,5 +20,6 @@ export class Matching {
         this.Accounts = accounts ? accounts : [];
         this.Matches = matches ? matches : [];
         this.State = 'Initial';
+        this.Guuid = undefined; // to ensure vue can update it.
     }
 }
