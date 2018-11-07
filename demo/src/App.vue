@@ -102,9 +102,7 @@ export default class App extends Vue {
   private async reconcile() {
     const matchId = this.matchings[0];
     this.$store.dispatch('matching/reconcile', matchId);
-    setInterval(() => {
-      this.$store.dispatch('matching/syncSolution', matchId);
-    }, 2000);
+    this.$store.dispatch('matching/syncSolution', matchId);
   }
 }
 </script>

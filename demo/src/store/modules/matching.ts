@@ -23,6 +23,7 @@ const getterTree: GetterTree<State, RootState> = {
 
 const mutationTree: MutationTree<State> = {
     addMatching(state: State, matchingModel: MatchingModel) {
+        // Object.assign is neccesary for adding new fields for vuex to be reactive
         state.matchings = Object.assign({}, state.matchings, { [matchingModel.Id]: matchingModel });
         state.matchingIds.push(matchingModel.Id.toString());
     },
@@ -49,12 +50,17 @@ const actionTree: ActionTree<State, RootState> = {
         commit('setGuuid', { matchingModel: m, guuid: id });
     },
     async syncSolution(
-        { commit, state }: ActionContext<State, RootState>, matchingId: string) {
+        { commit, state, dispatch }: ActionContext<State, RootState>, matchingId: string) {
         const m = state.matchings[matchingId];
         if (m.Guuid) {
             const solution = await masterClient.getSolution(m.Guuid);
             const mappedSolution = solution.matches.map((match) => new Match(match.ids));
             commit('setSolution', { matchingModel: m, solution: mappedSolution });
+            const isFinished = await masterClient.getIsFinished(m.Guuid);
+            if (!isFinished) {
+                setTimeout(() => dispatch('syncSolution'), 2000);
+                return;
+            }
         }
     },
 };

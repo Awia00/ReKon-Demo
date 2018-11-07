@@ -17,7 +17,8 @@ const getterTree: GetterTree<State, RootState> = {
 
 const mutationTree: MutationTree<State> = {
     addAccount(state: State, accountModel: AccountModel) {
-        state.accounts[accountModel.Id] = (accountModel);
+        // Object.assign is neccesary for adding new fields for vuex to be reactive
+        state.accounts = Object.assign({}, state.accounts, { [accountModel.Id]: accountModel });
         state.accountIds.push(accountModel.Id.toString());
     },
 };
