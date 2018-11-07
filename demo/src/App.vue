@@ -50,17 +50,17 @@
       <v-layout column fill-height justify-space-between>
         <v-layout align-start justify-center row>
           <v-flex v-if="accounts[0]">
-            <ViewAccount v-bind:account="accounts[0]"/>
+            <ViewAccount v-bind:accountId="accounts[0]"/>
           </v-flex>
           <v-flex v-if="accounts[1]">
-            <ViewAccount v-bind:account="accounts[1]"/>
+            <ViewAccount v-bind:accountId="accounts[1]"/>
           </v-flex>
         </v-layout>
         <v-flex v-if="matchings.length >= 1">
           <v-layout align-center justify-center>
             <v-btn dark color="primary" @click="reconcile()">Reconcile</v-btn>
           </v-layout>
-          <ViewMatching v-bind:matching="matchings[0]"/>
+          <ViewMatching v-bind:matchingId="matchings[0]"/>
         </v-flex>
       </v-layout>
     </v-content>
@@ -76,7 +76,7 @@ import ViewMatching from '@/components/ViewMatching.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
-import { setTimeout, setInterval } from 'timers';
+import { setTimeout, setInterval, clearInterval } from 'timers';
 
 @Component({
   components: {
@@ -89,19 +89,22 @@ import { setTimeout, setInterval } from 'timers';
 export default class App extends Vue {
   private drawer: boolean = false;
 
-  get accounts(): AccountModel[] {
-    const result = this.$store.getters['account/accountSet'];
+  get accounts(): number[] {
+    const result: number[] = this.$store.state.account.accountIds;
     return result ? result : [];
   }
 
-  get matchings(): MatchingModel[] {
-    const result = this.$store.getters['matching/matchingSet'];
+  get matchings(): number[] {
+    const result: number[] = this.$store.state.matching.matchingIds;
     return result ? result : [];
   }
 
   private async reconcile() {
-    this.$store.dispatch('matching/reconcile', this.matchings[0]);
-    return;
+    const matchId = this.matchings[0];
+    this.$store.dispatch('matching/reconcile', matchId);
+    setInterval(() => {
+      this.$store.dispatch('matching/syncSolution', matchId);
+    }, 2000);
   }
 }
 </script>

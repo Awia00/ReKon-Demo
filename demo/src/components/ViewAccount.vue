@@ -22,13 +22,19 @@ import { Account as AccountModel } from '../models/Account';
 
 @Component({})
 export default class ViewAccount extends Vue {
-  @Prop(AccountModel)
-  private account!: AccountModel;
+  @Prop(String)
+  private accountId!: string;
 
   private headers = Object.keys(new TransactionModel()).map((prop) => {
     return { text: prop, value: prop };
   });
-  private transactions = this.account.Transactions;
+
+  get account(): AccountModel {
+    return this.$store.state.account.accounts[this.accountId];
+  }
+  get transactions() {
+    return this.account.Transactions;
+  }
 }
 </script>
 

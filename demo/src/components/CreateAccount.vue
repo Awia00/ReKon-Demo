@@ -58,7 +58,9 @@
                             </div>
                             <div v-if="type==='Upload'">
                                 <h2>Upload</h2>
-                                <FileUpload v-on:fileResult="fileResult($event)"/>
+                                <!--v-if for destroy + rebuild fileupload hack-->
+
+                                <FileUpload v-if="dialog" v-on:fileResult="fileResult($event)"/>
                             </div>
                         </v-flex>
                         <v-divider></v-divider>
@@ -146,8 +148,8 @@ export default class CreateAccount extends Vue {
         this.transactions = [];
         this.title = '';
         this.internal = true;
-        this.type = 'Manual';
-        this.toggle = 0;
+        this.type = 'Upload';
+        this.toggle = 2;
     }
 
     private cancel() {

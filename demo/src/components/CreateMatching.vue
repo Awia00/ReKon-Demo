@@ -7,16 +7,16 @@
           <v-toolbar-title>Matching</v-toolbar-title>
         </v-toolbar>
         <v-card-text>
-          <v-text-field label="Title" v-bind="title"></v-text-field>
+          <v-text-field label="Title" v-model="title"></v-text-field>
           <h2>Accounts</h2>
           <p>Flag the accounts you want to reconcile</p>
           <v-list two-line subheader>
             <template v-for="(item, index) in accounts">
-              <v-list-tile :key="index">
+              <v-list-tile :key="index" @click>
                 <v-list-tile-action>
                   <v-checkbox v-model="item.checked"></v-checkbox>
                 </v-list-tile-action>
-                <v-list-tile-content>
+                <v-list-tile-content @click="item.checked = !item.checked">
                   <v-list-tile-title v-html="item.account.Title"></v-list-tile-title>
                   <v-list-tile-sub-title v-if="item.account.Internal">Internal</v-list-tile-sub-title>
                   <v-list-tile-sub-title v-else>External</v-list-tile-sub-title>

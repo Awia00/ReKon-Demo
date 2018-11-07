@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { GetterTree, MutationTree, ActionTree, ActionContext, Module } from 'vuex';
 import { State as RootState } from '../store';
 import { Matching as MatchingModel } from '@/models/Matching';
@@ -15,11 +16,14 @@ const getterTree: GetterTree<State, RootState> = {
     matchingSet(state: State): MatchingModel[] {
         return state.matchingIds.map((x) => state.matchings[x]);
     },
+    getMatching: (state: State) => (id: string): MatchingModel => {
+        return state.matchings[id];
+    },
 };
 
 const mutationTree: MutationTree<State> = {
     addMatching(state: State, matchingModel: MatchingModel) {
-        state.matchings[matchingModel.Id] = matchingModel;
+        state.matchings = Object.assign({}, state.matchings, { [matchingModel.Id]: matchingModel });
         state.matchingIds.push(matchingModel.Id.toString());
     },
     setGuuid(state: State, { matchingModel, guuid }: { matchingModel: MatchingModel, guuid: string }) {
@@ -35,20 +39,22 @@ const masterClient = new ReconciliationClient();
 
 const actionTree: ActionTree<State, RootState> = {
     async addMatching(
-        { commit, rootState }: ActionContext<State, RootState>, matchingModel: MatchingModel) {
+        { commit, state }: ActionContext<State, RootState>, matchingModel: MatchingModel) {
         commit('addMatching', matchingModel);
     },
     async reconcile(
-        { commit, rootState }: ActionContext<State, RootState>, matchingModel: MatchingModel) {
-        const id: string = await masterClient.postInstance(matchingModel);
-        commit('setGuuid', { matchingModel: matchingModel.Id, guuid: id });
+        { commit, state }: ActionContext<State, RootState>, matchingId: string) {
+        const m = state.matchings[matchingId];
+        const id: string = await masterClient.postInstance(m);
+        commit('setGuuid', { matchingModel: m, guuid: id });
     },
     async syncSolution(
-        { commit, rootState, rootGetters }: ActionContext<State, RootState>, matchingModel: MatchingModel) {
-        if (matchingModel.Guuid) {
-            const solution = await masterClient.getSolution(matchingModel.Guuid);
-            const mappedSolution = solution.matches.map((m) => new Match(m.ids));
-            commit('setSolution', { matchingModel: matchingModel.Id, solution: mappedSolution });
+        { commit, state }: ActionContext<State, RootState>, matchingId: string) {
+        const m = state.matchings[matchingId];
+        if (m.Guuid) {
+            const solution = await masterClient.getSolution(m.Guuid);
+            const mappedSolution = solution.matches.map((match) => new Match(match.ids));
+            commit('setSolution', { matchingModel: m, solution: mappedSolution });
         }
     },
 };

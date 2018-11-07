@@ -13,7 +13,6 @@ export class ReconciliationClient {
      */
     public async postInstance(matching: Matching): Promise<string> {
         try {
-            debugger;
             const instance = matching.Accounts.reduce((state: TransactionDto[], current: Account) => {
                 return state.concat(this.convertAccount(current));
             }, []);
@@ -39,7 +38,6 @@ export class ReconciliationClient {
 
     // todo make websocket based.
     public async getSolution(guid: string): Promise<SolutionDto> {
-        debugger;
         try {
             const { data }: { data: SolutionDto } = await await Axios.get(`${this.host}instances/${guid}/solutions`);
             return data;

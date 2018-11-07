@@ -1,10 +1,10 @@
 <template>
   <v-container>
-    <h1>{{matching.Id}}</h1>
+    <h1>{{matching.Title}}</h1>
     <v-data-table :headers="headers" :items="matches" hide-actions class="elevation-1">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.Id }}</td>
-        <td>{{ props.item.Transactions.map(x => x.id) }}</td>
+        <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
       </template>
     </v-data-table>
   </v-container>
@@ -18,16 +18,25 @@ import { Transaction as TransactionModel} from '@/models/Transaction';
 
 @Component({})
 export default class ViewMatching extends Vue {
-  @Prop(MatchingModel)
-  private matching!: MatchingModel;
+  @Prop(String)
+  private matchingId!: string;
 
   private headers = Object.keys(new MatchModel()).map((prop) => {
     return {text: prop, value: prop};
   });
-  private matches = this.matching.Matches;
 
-  private getListOfIds(transactions: TransactionModel[]): string {
-    const result = transactions.reduce((state, curr) => state + curr.Id + ', ', '');
+  get matching(): MatchingModel {
+    const result = this.$store.getters['matching/getMatching'](this.matchingId);
+    return result;
+  }
+
+  get matches(): MatchModel[] {
+    const result = this.matching.Matches;
+    return result;
+  }
+
+  private getListOfIds(transactionIds: number[]): string {
+    const result = transactionIds.reduce((state, curr) => state + curr + ', ', '');
     return result;
   }
 }
