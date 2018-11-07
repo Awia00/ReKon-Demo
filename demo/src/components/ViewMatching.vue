@@ -23,7 +23,7 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Matching as MatchingModel } from '../models/Matching';
 import { Match as MatchModel } from '../models/Match';
-import { Transaction as TransactionModel} from '@/models/Transaction';
+import { Transaction as TransactionModel } from '@/models/Transaction';
 
 @Component({})
 export default class ViewMatching extends Vue {
@@ -31,7 +31,7 @@ export default class ViewMatching extends Vue {
   private matchingId!: string;
 
   private headers = Object.keys(new MatchModel()).map((prop) => {
-    return {text: prop, value: prop};
+    return { text: prop, value: prop };
   });
 
   get matching(): MatchingModel {
@@ -54,7 +54,10 @@ export default class ViewMatching extends Vue {
   }
 
   private getListOfIds(transactionIds: number[]): string {
-    const result = transactionIds.reduce((state, curr) => state + curr + ', ', '');
+    const result = transactionIds.reduce(
+      (state, curr) => state + curr + ', ',
+      '',
+    );
     return result;
   }
 }
