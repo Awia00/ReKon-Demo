@@ -10,12 +10,16 @@
       </div>
       <h2 v-if="matching.State === 'Finished'">Finished solving</h2>
     </v-layout>
-    <v-data-table :headers="headers" :items="matches" hide-actions class="elevation-1">
-      <template slot="items" slot-scope="props">
-        <td>{{ props.item.Id }}</td>
-        <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
-      </template>
-    </v-data-table>
+    <v-flex @mouseout="clearActiveMatch()">
+      <v-data-table :headers="headers" :items="matches" hide-actions class="elevation-1">
+        <template slot="items" slot-scope="props">
+          <tr @mouseover="setActiveMatch(props.item)">
+            <td>{{ props.item.Id }}</td>
+            <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
+          </tr>
+        </template>
+      </v-data-table>
+    </v-flex>
   </v-container>
 </template>
 
@@ -59,6 +63,14 @@ export default class ViewMatching extends Vue {
       '',
     );
     return result;
+  }
+
+  private clearActiveMatch() {
+    this.$store.commit('account/setActiveTransactions', []);
+  }
+
+  private setActiveMatch(match: MatchModel) {
+    this.$store.commit('account/setActiveTransactions', match.TransactionIds);
   }
 }
 </script>

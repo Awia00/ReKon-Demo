@@ -3,13 +3,15 @@
     <h1>{{account.Title}}</h1>
     <v-data-table :headers="headers" :items="transactions" hide-actions class="elevation-1">
       <template slot="items" slot-scope="props">
-        <td>{{ props.item.Id }}</td>
-        <td>{{ props.item.Value }}</td>
-        <td
-          v-if="props.item.Date"
-        >{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
-        <td v-else></td>
-        <td>{{ props.item.Text }}</td>
+        <tr v-bind:class="{'open': props.item.State === 'Open', 'active': isActive(props.item)}">
+          <td>{{ props.item.Id }}</td>
+          <td>{{ props.item.Value }}</td>
+          <td
+            v-if="props.item.Date"
+          >{{ props.item.Date.toDateString()}}</td>
+          <td v-else></td>
+          <td>{{ props.item.Text }}</td>
+        </tr>
       </template>
     </v-data-table>
   </v-container>
@@ -25,9 +27,12 @@ export default class ViewAccount extends Vue {
   @Prop(String)
   private accountId!: string;
 
-  private headers = Object.keys(new TransactionModel()).map((prop) => {
-    return { text: prop, value: prop };
-  });
+  private headers = [
+    { text: 'Id', value: 'Id' },
+    { text: 'Value', value: 'Value' },
+    { text: 'Date', value: 'Date' },
+    { text: 'Text', value: 'Text' },
+  ];
 
   get account(): AccountModel {
     return this.$store.state.account.accounts[this.accountId];
@@ -35,8 +40,20 @@ export default class ViewAccount extends Vue {
   get transactions() {
     return this.account.Transactions;
   }
+  get activeTransactions(): number[] {
+    return this.$store.state.account.activeTransactions;
+  }
+  private isActive(t: TransactionModel): boolean {
+    return this.activeTransactions.find((x) => x === t.Id) !== undefined;
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.open {
+  background-color: #ffb3b3;
+}
+.active {
+  background-color: #ccffcc;
+}
 </style>

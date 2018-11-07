@@ -38,12 +38,14 @@ const mutationTree: MutationTree<State> = {
   setGuuid(state: State, { id, guuid }: { id: string; guuid: string }) {
     state.matchings[id].Guuid = guuid;
   },
+
   setSolution(
     state: State,
     { id, solution }: { id: string; solution: Match[] },
   ) {
     state.matchings[id].Matches = solution;
   },
+
   setMatchingState(
     state: State,
     { id, mState }: { id: string; mState: MatchingState },
@@ -53,7 +55,6 @@ const mutationTree: MutationTree<State> = {
 };
 
 const masterClient = new ReconciliationClient();
-
 const actionTree: ActionTree<State, RootState> = {
   async addMatching(
     { commit, state }: ActionContext<State, RootState>,
@@ -61,6 +62,7 @@ const actionTree: ActionTree<State, RootState> = {
   ) {
     commit('addMatching', matchingModel);
   },
+
   async reconcile(
     { commit, state }: ActionContext<State, RootState>,
     matchingId: string,
@@ -70,13 +72,14 @@ const actionTree: ActionTree<State, RootState> = {
     commit('setGuuid', { id: matchingId, guuid: id });
     commit('setMatchingState', { id: matchingId, mState: 'Solving' });
   },
+
   async syncSolution(
     { commit, state, dispatch }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
     const m = state.matchings[matchingId];
     if (m.Guuid) {
-      const solution = await masterClient.getSolution(m.Guuid);
+      const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
       const mappedSolution = solution.matches.map(
         (match) => new Match(match.ids),
       );
@@ -87,9 +90,18 @@ const actionTree: ActionTree<State, RootState> = {
         return;
       } else {
         commit('setMatchingState', { id: matchingId, mState: 'Finished' });
+        dispatch(
+          'account/markOpenItems',
+          {
+            accountIds: m.Accounts.map((x) => x.Id),
+            solution,
+          },
+          { root: true },
+        );
       }
     }
   },
+
   async stopSolving(
     { commit, state }: ActionContext<State, RootState>,
     matchingId: string,

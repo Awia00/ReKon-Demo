@@ -100,73 +100,97 @@ import moment from 'moment';
 
 type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({
-    components: {
-        FileUpload,
-    },
+  components: {
+    FileUpload,
+  },
 })
 export default class CreateAccount extends Vue {
-    // UI
-    public dialog: boolean = false;
-    public toggle: number = 0;
-    public type: inputType = 'Manual';
-    public headers = Object.keys(new TransactionModel()).map((prop) => {
-        return {text: prop, value: prop};
+  // UI
+  private dialog: boolean = false;
+  private toggle: number = 0;
+  private type: inputType = 'Manual';
+  private headers = [
+    { text: 'Id', value: 'Id' },
+    { text: 'Value', value: 'Value' },
+    { text: 'Date', value: 'Date' },
+    { text: 'Text', value: 'Text' },
+  ];
+
+  // MODEL
+  private title: string = '';
+  private internal: boolean = true;
+  private transactions: TransactionModel[] = [];
+  private manualTransaction = { Value: 0, Date: '', Text: '' };
+
+  // METHODS
+  private async fileResult(data: any[]) {
+    this.transactions = data.map((dp) => {
+      return TransactionModel.parse(dp);
     });
+  }
 
-    // MODEL
-    public title: string = '';
-    public internal: boolean = true;
-    public transactions: TransactionModel[] = [];
-    public manualTransaction =  { Value: 0, Date: '', Text: '' };
+  private async addManualTransaction() {
+    const year: number = parseInt(
+      this.manualTransaction.Date.substring(0, 4),
+      10,
+    );
+    const month: number = parseInt(
+      this.manualTransaction.Date.substring(4, 6),
+      10,
+    );
+    const day: number = parseInt(
+      this.manualTransaction.Date.substring(6, 8),
+      10,
+    );
+    const hour: number = parseInt(
+      this.manualTransaction.Date.substring(8, 10),
+      10,
+    );
+    const min: number = parseInt(
+      this.manualTransaction.Date.substring(10, 12),
+      10,
+    );
+    const seconds: number = parseInt(
+      this.manualTransaction.Date.substring(12, 14),
+      10,
+    );
+    this.transactions.push(
+      new TransactionModel(
+        this.manualTransaction.Value,
+        new Date(year, month, day, hour, min, seconds),
+        this.manualTransaction.Text,
+      ),
+    );
+    this.manualTransaction.Value = 0;
+    this.manualTransaction.Date = '';
+    this.manualTransaction.Text = '';
+  }
 
-    // METHODS
-    private async fileResult(data: any[]) {
-        this.transactions = data.map((dp) => {
-            return TransactionModel.parse(dp);
-        });
-    }
+  private open() {
+    this.dialog = true;
+    this.transactions = [];
+    this.title = '';
+    this.internal = true;
+    this.type = 'Upload';
+    this.toggle = 2;
+  }
 
-    private async addManualTransaction() {
-        const year: number = parseInt(this.manualTransaction.Date.substring(0, 4), 10);
-        const month: number = parseInt(this.manualTransaction.Date.substring(4, 6), 10);
-        const day: number = parseInt(this.manualTransaction.Date.substring(6, 8), 10);
-        const hour: number = parseInt(this.manualTransaction.Date.substring(8, 10), 10);
-        const min: number = parseInt(this.manualTransaction.Date.substring(10, 12), 10);
-        const seconds: number = parseInt(this.manualTransaction.Date.substring(12, 14), 10);
-        this.transactions.push(new TransactionModel(
-            this.manualTransaction.Value,
-            new Date(year, month, day, hour, min, seconds),
-            this.manualTransaction.Text,
-        ));
-        this.manualTransaction.Value = 0;
-        this.manualTransaction.Date = '';
-        this.manualTransaction.Text = '';
-    }
+  private cancel() {
+    this.dialog = false;
+  }
 
-    private open() {
-        this.dialog = true;
-        this.transactions = [];
-        this.title = '';
-        this.internal = true;
-        this.type = 'Upload';
-        this.toggle = 2;
-    }
+  private async create() {
+    await this.$store.dispatch(
+      'account/addAccount',
+      new AccountModel(this.title, this.transactions, this.internal),
+    );
 
-    private cancel() {
-        this.dialog = false;
-    }
-
-    private async create() {
-        await this.$store.dispatch(
-            'account/addAccount',
-            new AccountModel(this.title, this.transactions, this.internal));
-
-        this.dialog = false;
-        this.transactions = [];
-        this.title = '';
-        this.internal = true;
-        return;
-    }
+    this.dialog = false;
+    this.transactions = [];
+    this.title = '';
+    this.internal = true;
+    return;
+  }
 }
 </script>
 
@@ -176,7 +200,7 @@ export default class CreateAccount extends Vue {
   transition: opacity 0.2s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0.0s;
+  opacity: 0s;
 }
 .fade-element {
   position: absolute;
