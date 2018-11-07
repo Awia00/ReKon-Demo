@@ -1,5 +1,7 @@
 import { Account } from './Account';
 import { Match } from './Match';
+
+export type MatchingState = 'Initial' | 'Solving' | 'Finished';
 export class Matching {
     private static IdCounter: number = 0;
 
@@ -7,7 +9,8 @@ export class Matching {
     public Id: number;
     public Title: string;
     public Matches: Match[];
-    public Accounts: ReadonlyArray<Account>;
+    public Accounts: ReadonlyArray<Account>; // todo id array
+    public State: MatchingState;
 
     constructor();
     constructor(title: string, accounts: ReadonlyArray<Account>, matches: Match[]);
@@ -16,5 +19,6 @@ export class Matching {
         this.Title = title ? title : 'Matching ' + (this.Id);
         this.Accounts = accounts ? accounts : [];
         this.Matches = matches ? matches : [];
+        this.State = 'Initial';
     }
 }

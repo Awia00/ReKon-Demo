@@ -20,7 +20,7 @@ export class ReconciliationClient {
             return data;
         } catch (error) {
             // tslint:disable-next-line:no-console
-            console.error('Error from Server: ' + error);
+            console.error('(postInstance) Error from Server: ' + error);
             throw error;
         }
     }
@@ -31,7 +31,17 @@ export class ReconciliationClient {
             return data;
         } catch (error) {
             // tslint:disable-next-line:no-console
-            console.error('Error from Server: ' + error);
+            console.error('(getIsFinished) Error from Server: ' + error);
+            throw error;
+        }
+    }
+
+    public async putIsFinished(guid: string): Promise<void> {
+        try {
+            await Axios.put(`${this.host}instances/${guid}/finished`);
+        } catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error('(putIsFinished) Error from Server: ' + error);
             throw error;
         }
     }
@@ -43,7 +53,7 @@ export class ReconciliationClient {
             return data;
         } catch (error) {
             // tslint:disable-next-line:no-console
-            console.error('Error from Server: ' + error);
+            console.error('(getSolution) Error from Server: ' + error);
             throw error;
         }
     }

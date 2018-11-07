@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { GetterTree, MutationTree, ActionTree, ActionContext, Module } from 'vuex';
 import { State as RootState } from '../store';
-import { Matching as MatchingModel } from '@/models/Matching';
+import { Matching as MatchingModel, MatchingState } from '@/models/Matching';
 import { ReconciliationClient } from '@/api/ReconciliationClient';
 import IdMap from '../IdMapper';
 import { Match } from '@/models/Match';
@@ -27,11 +27,14 @@ const mutationTree: MutationTree<State> = {
         state.matchings = Object.assign({}, state.matchings, { [matchingModel.Id]: matchingModel });
         state.matchingIds.push(matchingModel.Id.toString());
     },
-    setGuuid(state: State, { matchingModel, guuid }: { matchingModel: MatchingModel, guuid: string }) {
-        state.matchings[matchingModel.Id].Guuid = guuid;
+    setGuuid(state: State, { id, guuid }: { id: string, guuid: string }) {
+        state.matchings[id].Guuid = guuid;
     },
-    setSolution(state: State, { matchingModel, solution }: { matchingModel: MatchingModel, solution: Match[] }) {
-        state.matchings[matchingModel.Id].Matches = solution;
+    setSolution(state: State, { id, solution }: { id: string, solution: Match[] }) {
+        state.matchings[id].Matches = solution;
+    },
+    setMatchingState(state: State, { id, mState }: { id: string, mState: MatchingState }) {
+        state.matchings[id].State = mState;
     },
 };
 
@@ -47,7 +50,8 @@ const actionTree: ActionTree<State, RootState> = {
         { commit, state }: ActionContext<State, RootState>, matchingId: string) {
         const m = state.matchings[matchingId];
         const id: string = await masterClient.postInstance(m);
-        commit('setGuuid', { matchingModel: m, guuid: id });
+        commit('setGuuid', { id: matchingId, guuid: id });
+        commit('setMatchingState', { id: matchingId, mState: 'Solving' });
     },
     async syncSolution(
         { commit, state, dispatch }: ActionContext<State, RootState>, matchingId: string) {
@@ -55,12 +59,20 @@ const actionTree: ActionTree<State, RootState> = {
         if (m.Guuid) {
             const solution = await masterClient.getSolution(m.Guuid);
             const mappedSolution = solution.matches.map((match) => new Match(match.ids));
-            commit('setSolution', { matchingModel: m, solution: mappedSolution });
+            commit('setSolution', { id: matchingId, solution: mappedSolution });
             const isFinished = await masterClient.getIsFinished(m.Guuid);
             if (!isFinished) {
                 setTimeout(() => dispatch('syncSolution'), 2000);
                 return;
             }
+        }
+    },
+    async stopSolving(
+        { commit, state }: ActionContext<State, RootState>, matchingId: string) {
+        const m = state.matchings[matchingId];
+        if (m.Guuid) {
+            await masterClient.putIsFinished(m.Guuid);
+            commit('setMatchingState', { id: matchingId, mState: 'Finished' });
         }
     },
 };

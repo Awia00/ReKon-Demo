@@ -1,6 +1,15 @@
 <template>
   <v-container>
-    <h1>{{matching.Title}}</h1>
+    <v-layout row>
+      <h1>{{matching.Title}}</h1>
+      <v-spacer></v-spacer>
+      <v-btn v-if="matching.State === 'Initial'" dark color="primary" @click="reconcile()">Reconcile</v-btn>
+      <div v-if="matching.State === 'Solving'">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        <v-btn dark color="primary" @click="stop()">Stop</v-btn>
+      </div>
+      <h2 v-if="matching.State === 'Finished'">Finished solving</h2>
+    </v-layout>
     <v-data-table :headers="headers" :items="matches" hide-actions class="elevation-1">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.Id }}</td>
@@ -33,6 +42,15 @@ export default class ViewMatching extends Vue {
   get matches(): MatchModel[] {
     const result = this.matching.Matches;
     return result;
+  }
+
+  private async reconcile() {
+    this.$store.dispatch('matching/reconcile', this.matching.Id);
+    this.$store.dispatch('matching/syncSolution', this.matching.Id);
+  }
+
+  private async stop() {
+    this.$store.dispatch('matching/stopSolving', this.matching.Id);
   }
 
   private getListOfIds(transactionIds: number[]): string {
