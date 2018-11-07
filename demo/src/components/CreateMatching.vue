@@ -44,29 +44,32 @@ import { Matching as MatchingModel } from '@/models/Matching';
 
 @Component({})
 export default class CreateMatching extends Vue {
-    public dialog: boolean = false;
-    public title: string = '';
-    public accounts: Array<{account: AccountModel, checked: boolean}> = [];
+  public dialog: boolean = false;
+  public title: string = '';
+  public accounts: Array<{ account: AccountModel; checked: boolean }> = [];
 
-    private open() {
-      this.accounts = this.$store.getters['account/accountSet'].map((a: AccountModel) => {
+  private open() {
+    this.accounts = this.$store.getters['account/accountSet'].map(
+      (a: AccountModel) => {
         return { account: a, checked: false };
-      });
-      this.dialog = true;
-    }
+      },
+    );
+    this.dialog = true;
+  }
 
-    private cancel() {
-      this.dialog = false;
-    }
+  private cancel() {
+    this.dialog = false;
+  }
 
-    private async create() {
-      const toSave = this.accounts.filter((a) => a.checked).map((a) => a.account);
-      await this.$store.dispatch(
-            'matching/addMatching',
-            new MatchingModel(this.title, toSave, []));
-      this.dialog = false;
-      return;
-    }
+  private async create() {
+    const toSave = this.accounts.filter((a) => a.checked).map((a) => a.account);
+    await this.$store.dispatch(
+      'matching/addMatching',
+      new MatchingModel(this.title, toSave, []),
+    );
+    this.dialog = false;
+    return;
+  }
 }
 </script>
 

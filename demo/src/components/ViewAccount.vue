@@ -6,9 +6,7 @@
         <tr v-bind:class="{'open': props.item.State === 'Open', 'active': isActive(props.item)}">
           <td>{{ props.item.Id }}</td>
           <td>{{ props.item.Value }}</td>
-          <td
-            v-if="props.item.Date"
-          >{{ props.item.Date.toDateString()}}</td>
+          <td v-if="props.item.Date">{{ props.item.Date.toDateString()}}</td>
           <td v-else></td>
           <td>{{ props.item.Text }}</td>
         </tr>
