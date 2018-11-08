@@ -80,10 +80,12 @@ const actionTree: ActionTree<State, RootState> = {
     const m = state.matchings[matchingId];
     if (m.Guuid) {
       const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
-      const mappedSolution = solution.matches.map(
-        (match) => new Match(match.ids),
-      );
-      commit('setSolution', { id: matchingId, solution: mappedSolution });
+      if (m.Matches.length < solution.incumbent) {
+        const mappedSolution = solution.matches.map(
+          (match) => new Match(match.ids),
+        );
+        commit('setSolution', { id: matchingId, solution: mappedSolution });
+      }
       const isFinished = await masterClient.getIsFinished(m.Guuid);
       if (!isFinished) {
         setTimeout(() => dispatch('syncSolution', matchingId), 2000);
