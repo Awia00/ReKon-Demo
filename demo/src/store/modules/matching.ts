@@ -86,7 +86,7 @@ const actionTree: ActionTree<State, RootState> = {
       commit('setSolution', { id: matchingId, solution: mappedSolution });
       const isFinished = await masterClient.getIsFinished(m.Guuid);
       if (!isFinished) {
-        setTimeout(() => dispatch('matching/syncSolution'), 2000);
+        setTimeout(() => dispatch('syncSolution', matchingId), 2000);
         return;
       } else {
         commit('setMatchingState', { id: matchingId, mState: 'Finished' });
