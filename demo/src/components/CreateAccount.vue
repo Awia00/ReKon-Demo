@@ -124,8 +124,9 @@ export default class CreateAccount extends Vue {
     required: (value: string) => !!value || 'Required',
     maxLength: (value: string) => value.length <= 30 || 'Maximum 30 characters',
     twoPointDecimal: (value: string) =>
-      !isNaN(parseFloat(value)) && 
-      parseFloat(value) === Number(parseFloat(value).toFixed(2)) || 'Number with atmost 2 decimals',
+      (!isNaN(parseFloat(value)) &&
+        parseFloat(value) === Number(parseFloat(value).toFixed(2))) ||
+      'Number with atmost 2 decimals',
   };
 
   // MODEL

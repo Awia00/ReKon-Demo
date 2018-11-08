@@ -7,9 +7,13 @@
         <span class="font-weight-light">Automated Account Reconciliation</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon>more_vert</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <h3 slot="activator" class="font-weight-light">[Demo Build]</h3>
+        <span>
+          Interested in more? Contact us at
+          <b>awis@itu.dk</b>
+        </span>
+      </v-tooltip>
     </v-toolbar>
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list-tile>
