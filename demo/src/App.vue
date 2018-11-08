@@ -46,7 +46,7 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-navigation-drawer>
-    <v-content>
+    <v-content height="100%">
       <v-layout column fill-height justify-space-between>
         <v-layout align-start justify-center row>
           <v-flex v-if="accounts[0]">

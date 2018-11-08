@@ -11,12 +11,23 @@
       <h2 v-if="matching.State === 'Finished'">Finished solving</h2>
     </v-layout>
     <v-flex @mouseout="clearActiveMatch()">
-      <v-data-table :headers="headers" :items="matches" hide-actions class="elevation-1">
+      <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
         <template slot="items" slot-scope="props">
           <tr @mouseover="setActiveMatch(props.item)">
             <td>{{ props.item.Id }}</td>
             <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
           </tr>
+        </template>
+        <template slot="footer">
+          <td colspan="100%">
+            <v-text-field
+              v-model="search"
+              append-icon="search"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
+          </td>
         </template>
       </v-data-table>
     </v-flex>
@@ -33,6 +44,7 @@ import { Transaction as TransactionModel } from '@/models/Transaction';
 export default class ViewMatching extends Vue {
   @Prop(String)
   private matchingId!: string;
+  private search: string = '';
 
   private headers = Object.keys(new MatchModel()).map((prop) => {
     return { text: prop, value: prop };

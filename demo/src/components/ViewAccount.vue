@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <h1>{{account.Title}}</h1>
-    <v-data-table :headers="headers" :items="transactions" hide-actions class="elevation-1">
+    <v-data-table :headers="headers" :items="transactions" :search="search" class="elevation-1">
       <template slot="items" slot-scope="props">
         <tr v-bind:class="{'open': props.item.State === 'Open', 'active': isActive(props.item)}">
           <td>{{ props.item.Id }}</td>
@@ -9,7 +9,19 @@
           <td v-if="props.item.Date">{{ props.item.Date.toDateString()}}</td>
           <td v-else></td>
           <td>{{ props.item.Text }}</td>
+          <td>{{ props.item.State }}</td>
         </tr>
+      </template>
+      <template slot="footer">
+        <td colspan="100%">
+          <v-text-field
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+        </td>
       </template>
     </v-data-table>
   </v-container>
@@ -24,12 +36,14 @@ import { Account as AccountModel } from '../models/Account';
 export default class ViewAccount extends Vue {
   @Prop(String)
   private accountId!: string;
+  private search: string = '';
 
   private headers = [
     { text: 'Id', value: 'Id' },
     { text: 'Value', value: 'Value' },
     { text: 'Date', value: 'Date' },
     { text: 'Text', value: 'Text' },
+    { text: 'State', value: 'State' },
   ];
 
   get account(): AccountModel {
