@@ -9,7 +9,7 @@ export class Transaction {
       dynObject.Date !== undefined
         ? new Date(dynObject.Date.trim())
         : undefined!;
-    return new Transaction(Number(dynObject.Value), date, dynObject.Text);
+    return new Transaction(parseFloat(dynObject.Value), date, dynObject.Text);
   }
   private static IdCounter: number = 0;
 
