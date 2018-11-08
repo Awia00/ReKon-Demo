@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  demo:
+    image: registry.anderswind.dk/resolved-demo:latest
+    container_name: demo
+    restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik_proxy'
+      - 'traefik.backend=demo'
+      - 'traefik.frontend.rule=Host:demo.resolved.site'
+    networks:
+      - traefik_proxy
+
+networks:
+  traefik_proxy:
+    external: true
