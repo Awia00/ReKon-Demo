@@ -1,93 +1,98 @@
 <template>
-    <div>
-        <v-btn @click="open()">Create Account</v-btn>
-        <v-dialog scrollable v-model="dialog" max-width="600">
-            <v-card>
-                <v-toolbar dark color="primary">
-                    <v-toolbar-title>Account</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                    <v-btn-toggle class="transparent" v-model="toggle">
-                        <v-btn :value="0" flat @click="type = 'Manual'">Manual</v-btn>
-                        <v-btn :value="1" flat @click="type = 'Excel'">Excel</v-btn>
-                        <v-btn :value="2" flat @click="type = 'Upload'">Upload</v-btn>
-                    </v-btn-toggle>
-                </v-toolbar>
-                <v-card-text style="height: 650px">
-                    <v-layout column>
-                        <v-flex>
-                            <v-layout row>
-                                <v-flex>
-                                    <v-text-field label="Title" v-model="title"></v-text-field>
-                                </v-flex>
-                                <v-flex>
-                                    <v-switch :label="'Is internal'" v-model="internal"></v-switch>
-                                </v-flex>
-                            </v-layout>
-                            <div v-if="type==='Manual'">
-                                <v-flex>
-                                    <p>Input your data at the table below</p>
-                                    <v-layout row>
-                                        <v-flex xs12 sm6 md3>
-                                            <v-text-field
-                                                label="Value"
-                                                :mask="'#######'"
-                                                v-model="manualTransaction.Value"
-                                            ></v-text-field>
-                                        </v-flex>
-                                        <v-flex xs12 sm6 md3>
-                                            <v-text-field
-                                                label="Text"
-                                                v-model="manualTransaction.Text"
-                                            ></v-text-field>
-                                        </v-flex>
-                                        <v-flex xs12 sm6 md3>
-                                            <v-text-field
-                                                label="Date"
-                                                :mask="'####-##-## ##:##:##'"
-                                                v-model="manualTransaction.Date"
-                                            ></v-text-field>
-                                        </v-flex>
-                                        <v-flex xs12 sm6 md3>
-                                            <v-btn @click="addManualTransaction()">Add</v-btn>
-                                        </v-flex>
-                                    </v-layout>
-                                </v-flex>
-                            </div>
-                            <div v-if="type==='Excel'">
-                                <p>Excel is not supported yet</p>
-                            </div>
-                            <div v-if="type==='Upload'">
-                                <h2>Upload</h2>
-                                <!--v-if for destroy + rebuild fileupload hack-->
+  <div>
+    <v-btn @click="open()">Create Account</v-btn>
+    <v-dialog scrollable v-model="dialog" max-width="600">
+      <v-card>
+        <v-toolbar dark color="primary">
+          <v-toolbar-title>Account</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn-toggle class="transparent" v-model="toggle">
+            <v-btn :value="0" flat @click="type = 'Manual'">Manual</v-btn>
+            <v-btn :value="1" flat @click="type = 'Excel'">Excel</v-btn>
+            <v-btn :value="2" flat @click="type = 'Upload'">Upload</v-btn>
+          </v-btn-toggle>
+        </v-toolbar>
+        <v-card-text style="height: 650px">
+          <v-layout column>
+            <v-flex>
+              <v-layout row>
+                <v-flex>
+                  <v-text-field
+                    :rules="[rules.required, rules.maxLength]"
+                    label="Title"
+                    v-model="title"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex>
+                  <v-switch :label="'Is internal'" v-model="internal"></v-switch>
+                </v-flex>
+              </v-layout>
+              <div v-if="type==='Manual'">
+                <v-flex>
+                  <p>Input your data at the table below</p>
+                  <v-layout row>
+                    <v-flex xs12 sm6 md3>
+                      <v-text-field
+                        label="Value"
+                        v-model="manualTransaction.Value"
+                        :rules="[rules.required, rules.twoPointDecimal]"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex xs12 sm6 md3>
+                      <v-text-field
+                        :rules="[rules.maxLength]"
+                        label="Text"
+                        v-model="manualTransaction.Text"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex xs12 sm6 md3>
+                      <v-text-field
+                        label="Date"
+                        :mask="'####-##-## ##:##:##'"
+                        v-model="manualTransaction.Date"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex xs12 sm6 md3>
+                      <v-btn @click="addManualTransaction()">Add</v-btn>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+              </div>
+              <div v-if="type==='Excel'">
+                <p>Excel is not supported yet</p>
+              </div>
+              <div v-if="type==='Upload'">
+                <h2>Upload</h2>
+                <!--v-if for destroy + rebuild fileupload hack-->
 
-                                <FileUpload v-if="dialog" v-on:fileResult="fileResult($event)"/>
-                            </div>
-                        </v-flex>
-                        <v-divider></v-divider>
-                        <v-flex align-content-start justify-start>
-                            <h2>Transactions</h2>
-                            <v-data-table :headers="headers" :items="transactions">
-                                <template slot="items" slot-scope="props">
-                                    <td>{{ props.item.Id }}</td>
-                                    <td>{{ props.item.Value }}</td>
-                                    <td
-                                        v-if="props.item.Date"
-                                    >{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
-                                    <td v-else></td>
-                                    <td>{{ props.item.Text }}</td>
-                                </template>
-                            </v-data-table>
-                        </v-flex>
-                    </v-layout>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn @click="cancel()">Cancel</v-btn>
-                    <v-btn @click="create()" color="primary">Create</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-    </div>
+                <FileUpload v-if="dialog" v-on:fileResult="fileResult($event)"/>
+              </div>
+            </v-flex>
+            <v-divider></v-divider>
+            <v-flex align-content-start justify-start>
+              <h2>Transactions</h2>
+              <v-data-table :headers="headers" :items="transactions">
+                <template slot="items" slot-scope="props">
+                  <td>{{ props.item.Id }}</td>
+                  <td>{{ props.item.Value }}</td>
+                  <td
+                    v-if="props.item.Date"
+                  >{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
+                  <td v-else></td>
+                  <td>{{ props.item.Text }}</td>
+                </template>
+              </v-data-table>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="cancel()">Cancel</v-btn>
+          <v-btn @click="create()" color="primary">Create</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script lang="ts">
@@ -115,12 +120,19 @@ export default class CreateAccount extends Vue {
     { text: 'Date', value: 'Date' },
     { text: 'Text', value: 'Text' },
   ];
+  private rules = {
+    required: (value: string) => !!value || 'Required',
+    maxLength: (value: string) => value.length <= 30 || 'Maximum 30 characters',
+    twoPointDecimal: (value: string) =>
+      !isNaN(parseFloat(value)) && 
+      parseFloat(value) === Number(parseFloat(value).toFixed(2)) || 'Number with atmost 2 decimals',
+  };
 
   // MODEL
-  private title: string = '';
+  private title: string = ' ';
   private internal: boolean = true;
   private transactions: TransactionModel[] = [];
-  private manualTransaction = { Value: 0, Date: '', Text: '' };
+  private manualTransaction = { Value: '0', Date: '', Text: '' };
 
   // METHODS
   private async fileResult(data: any[]) {
@@ -156,12 +168,12 @@ export default class CreateAccount extends Vue {
     );
     this.transactions.push(
       new TransactionModel(
-        this.manualTransaction.Value,
+        Number(this.manualTransaction.Value),
         new Date(year, month, day, hour, min, seconds),
         this.manualTransaction.Text,
       ),
     );
-    this.manualTransaction.Value = 0;
+    this.manualTransaction.Value = '0';
     this.manualTransaction.Date = '';
     this.manualTransaction.Text = '';
   }
