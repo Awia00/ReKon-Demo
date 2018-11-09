@@ -13,7 +13,7 @@
           </v-btn-toggle>
         </v-toolbar>
         <v-card-text style="height: 650px">
-          <v-layout column>
+          <v-layout column fill-height>
             <v-flex>
               <v-layout row>
                 <v-flex>
@@ -27,9 +27,39 @@
                   <v-switch :label="'Is internal'" v-model="internal"></v-switch>
                 </v-flex>
               </v-layout>
+              <v-divider></v-divider>
               <div v-if="type==='Manual'">
+                <p>Write input freemform</p>
+                <v-layout row align-start>
+                  <v-textarea
+                    box
+                    label="Freeform input, supporting input styles: csv, algorithmic"
+                    hint="Transactions updates automatically when the input parses"
+                    v-model="freeform"
+                  ></v-textarea>
+                  <v-tooltip bottom>
+                    <v-icon slot="activator">info</v-icon>
+                    <span>Input format must be either</span>
+                    <p>
+                      <span>csv:</span>
+                      <br>
+                      <span>Value, Text, Date</span>
+                      <br>
+                      <span>99.99, hello1, 2018-10-10</span>
+                      <br>
+                      <span>199.99, hello2, 2018-10-10</span>
+                    </p>
+                    <p>
+                      <span>algoFormat [metadataId value]:</span>
+                      <br>
+                      <span>1, 99.99</span>
+                      <br>
+                      <span>2, 199.99</span>
+                    </p>
+                  </v-tooltip>
+                </v-layout>
                 <v-flex>
-                  <p>Input your data at the table below</p>
+                  <p>Input individual transactions in the table below</p>
                   <v-layout row>
                     <v-flex xs12 sm6 md3>
                       <v-text-field
@@ -69,7 +99,7 @@
               </div>
             </v-flex>
             <v-divider></v-divider>
-            <v-flex align-content-start justify-start>
+            <v-flex>
               <h2>Transactions</h2>
               <v-data-table :headers="headers" :items="transactions">
                 <template slot="items" slot-scope="props">
@@ -80,6 +110,11 @@
                   >{{ props.item.Date.toDateString() + ' ' + props.item.Date.toTimeString() }}</td>
                   <td v-else></td>
                   <td>{{ props.item.Text }}</td>
+                  <td>
+                    <v-btn flat icon @click="deleteTransaction(props.index)">
+                      <v-icon>delete_outline</v-icon>
+                    </v-btn>
+                  </td>
                 </template>
               </v-data-table>
             </v-flex>
@@ -96,12 +131,12 @@
 </template>
 
 <script lang="ts">
-import { Prop, Component, Vue } from 'vue-property-decorator';
+import { Watch, Prop, Component, Vue } from 'vue-property-decorator';
 import FileUpload from './FileUpload.vue';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Account as AccountModel } from '@/models/Account';
 import { mapActions } from 'vuex';
-import moment from 'moment';
+import Papa, { ParseResult } from 'papaparse';
 
 type inputType = 'Manual' | 'Excel' | 'Upload';
 @Component({
@@ -134,6 +169,7 @@ export default class CreateAccount extends Vue {
   private internal: boolean = true;
   private transactions: TransactionModel[] = [];
   private manualTransaction = { Value: '0', Date: '', Text: '' };
+  private freeform: string = '';
 
   // METHODS
   private async fileResult(data: any[]) {
@@ -142,35 +178,84 @@ export default class CreateAccount extends Vue {
     });
   }
 
-  private async addManualTransaction() {
+  private getDateFromNumber(input: string) {
     const year: number = parseInt(
-      this.manualTransaction.Date.substring(0, 4),
+      input.substring(0, 4),
       10,
     );
     const month: number = parseInt(
-      this.manualTransaction.Date.substring(4, 6),
+      input.substring(4, 6),
       10,
     );
     const day: number = parseInt(
-      this.manualTransaction.Date.substring(6, 8),
+      input.substring(6, 8),
       10,
     );
     const hour: number = parseInt(
-      this.manualTransaction.Date.substring(8, 10),
+      input.substring(8, 10),
       10,
     );
     const min: number = parseInt(
-      this.manualTransaction.Date.substring(10, 12),
+      input.substring(10, 12),
       10,
     );
     const seconds: number = parseInt(
-      this.manualTransaction.Date.substring(12, 14),
+      input.substring(12, 14),
       10,
     );
+    return new Date(year, month, day, hour, min, seconds);
+  }
+
+  private parsePromise = (content: string): Promise<ParseResult> => {
+    let data: ParseResult;
+    return new Promise( (resolve) => {
+      Papa.parse(content, {
+        header: true,
+        trimHeaders: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          data = results;
+        },
+      });
+      resolve(data);
+    });
+  }
+
+  private algoFormatRead(content: string): { transactions: TransactionModel[], errors: string[] } {
+    try {
+      const transactions = content.split('\n').map((line) => {
+        const words = line.split(' ');
+        const metadataId = words[0];
+        const value = Number(words[1]);
+        if (isNaN(value)) {
+          throw Error('Value not a number');
+        }
+        return new TransactionModel(value, new Date(''), metadataId);
+      });
+      return  { transactions, errors: [] };
+    } catch (error) {
+      return { transactions: [], errors: [error] };
+    }
+  }
+
+  @Watch('freeform')
+  private async freeformChange(newVal: string, oldVal: string) {
+    const csvResult = await this.parsePromise(newVal);
+    if (csvResult.errors.length === 0) {
+      this.fileResult(csvResult.data);
+      return;
+    }
+    const algoResult = this.algoFormatRead(newVal);
+    if (algoResult.errors.length === 0) {
+      this.transactions = algoResult.transactions;
+    }
+  }
+
+  private async addManualTransaction() {
     this.transactions.push(
       new TransactionModel(
         Number(this.manualTransaction.Value),
-        new Date(year, month, day, hour, min, seconds),
+        this.getDateFromNumber(this.manualTransaction.Date),
         this.manualTransaction.Text,
       ),
     );
@@ -190,6 +275,10 @@ export default class CreateAccount extends Vue {
 
   private cancel() {
     this.dialog = false;
+  }
+
+  private deleteTransaction(index: number) {
+    this.transactions.splice(index, 1);
   }
 
   private async create() {

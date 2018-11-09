@@ -1,29 +1,29 @@
 <template>
-    <div>
-        <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving"></form>
-        <div class="dropbox" v-if="isInitial">
-            <input
-                type="file"
-                :disabled="isSaving"
-                @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
-                accept=".csv"
-                class="input-file"
-            >
-            <p v-if="isInitial">Drag your file here to begin
-                <br>or click to browse
-            </p>
-            <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
-        </div>
-        <div v-if="isSuccess">
-            <p>Upload successfull.</p>
-            <v-btn @click="reset()">Upload again</v-btn>
-        </div>
-        <div v-if="isFailed">
-            <p>Uploaded failed.</p>
-            <v-btn @click="reset()">Upload again</v-btn>
-            <pre>{{ error }}</pre>
-        </div>
+  <div>
+    <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving"></form>
+    <div class="dropbox" v-if="isInitial">
+      <input
+        type="file"
+        :disabled="isSaving"
+        @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
+        accept=".csv"
+        class="input-file"
+      >
+      <p v-if="isInitial">Drag your file here to begin
+        <br>or click to browse
+      </p>
+      <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
     </div>
+    <div v-if="isSuccess">
+      <p>Upload successfull.</p>
+      <v-btn @click="reset()">Upload again</v-btn>
+    </div>
+    <div v-if="isFailed">
+      <p>Uploaded failed.</p>
+      <v-btn @click="reset()">Upload again</v-btn>
+      <pre>{{ error }}</pre>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -83,7 +83,7 @@ export default class FileUpload extends Vue {
     this.error = null;
     if (files.length === 1) {
       const file = files[0];
-      const test = Papa.parse(file, {
+      Papa.parse(file, {
         header: true,
         trimHeaders: true,
         skipEmptyLines: true,
