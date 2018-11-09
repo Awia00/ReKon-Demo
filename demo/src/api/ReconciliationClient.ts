@@ -5,7 +5,7 @@ import TransactionDto from './dtos/TransactionDto';
 import { Matching } from '@/models/Matching';
 
 export class ReconciliationClient {
-    private readonly host = `http://${process.env.VUE_APP_REKON_SERVER}:${
+    private readonly host = `${process.env.VUE_APP_REKON_SERVER}:${
         process.env.VUE_APP_REKON_SERVERPORT
     }/api/`;
     /**
