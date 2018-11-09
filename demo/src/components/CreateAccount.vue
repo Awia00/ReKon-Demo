@@ -29,7 +29,7 @@
               </v-layout>
               <v-divider></v-divider>
               <div v-if="type==='Manual'">
-                <p>Write input freemform</p>
+                <p>Write input freeform</p>
                 <v-layout row align-start>
                   <v-textarea
                     box
@@ -43,7 +43,7 @@
                     <p>
                       <span>csv:</span>
                       <br>
-                      <span>Value, Text, Date</span>
+                      <span>[headers] (Value, Text, Date)</span>
                       <br>
                       <span>99.99, hello1, 2018-10-10</span>
                       <br>
