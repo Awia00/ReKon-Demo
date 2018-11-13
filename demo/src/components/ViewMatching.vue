@@ -3,7 +3,7 @@
     <v-layout row>
       <h1>
         <span v-once>{{matching.Title}}</span>
-        <v-btn icon>
+        <v-btn icon @click="deleteMatching">
           <v-icon>delete</v-icon>
         </v-btn>
       </h1>
@@ -80,6 +80,10 @@ export default class ViewMatching extends Vue {
   private async resolve() {
     this.$store.commit('matching/setSolution', { id: this.matchingId, solution: [] });
     await this.reconcile();
+  }
+
+  private async deleteMatching() {
+    this.$store.commit('matching/removeMatching', this.matchingId);
   }
 
   private getListOfIds(transactionIds: number[]): string {

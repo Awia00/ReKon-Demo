@@ -35,6 +35,11 @@ const mutationTree: MutationTree<State> = {
     });
     state.matchingIds.push(matchingModel.Id.toString());
   },
+  removeMatching(state: State, matchingId: string) {
+    const index = state.matchingIds.indexOf(matchingId);
+    Vue.delete(state.matchings, matchingId);
+    state.matchingIds.splice(index, 1);
+  },
   setGuuid(state: State, { id, guuid }: { id: string; guuid: string }) {
     state.matchings[id].Guuid = guuid;
   },
