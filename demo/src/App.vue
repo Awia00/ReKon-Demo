@@ -52,7 +52,12 @@
     </v-navigation-drawer>
     <v-content height="100%">
       <v-layout column fill-height justify-space-between>
-        <v-layout align-start justify-center row>
+        <v-layout v-if="accounts.length === 0" row align-center justify-center>
+          <h2
+            class="font-weight-light"
+          >Click the hamburger menu in the upper left corner to add accounts and matchings</h2>
+        </v-layout>
+        <v-layout v-if="accounts.length !== 0" align-start justify-center row>
           <v-flex v-if="accounts[0]">
             <ViewAccount v-bind:accountId="accounts[0]"/>
           </v-flex>

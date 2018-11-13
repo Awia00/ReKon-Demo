@@ -1,14 +1,22 @@
 <template>
   <v-container>
     <v-layout row>
-      <h1>{{matching.Title}}</h1>
+      <h1>
+        <span v-once>{{matching.Title}}</span>
+        <v-btn icon>
+          <v-icon>delete</v-icon>
+        </v-btn>
+      </h1>
       <v-spacer></v-spacer>
       <v-btn v-if="matching.State === 'Initial'" dark color="primary" @click="reconcile()">Reconcile</v-btn>
       <div v-if="matching.State === 'Solving'">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
         <v-btn dark color="primary" @click="stop()">Stop</v-btn>
       </div>
-      <h2 v-if="matching.State === 'Finished'">Finished solving</h2>
+      <div v-if="matching.State === 'Finished'" style="display: contents">
+        <h2 style="margin: 10px">Finished solving</h2>
+        <v-btn @click="resolve()">Resolve</v-btn>
+      </div>
     </v-layout>
     <v-flex @mouseout="clearActiveMatch()">
       <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
@@ -67,6 +75,11 @@ export default class ViewMatching extends Vue {
 
   private async stop() {
     this.$store.dispatch('matching/stopSolving', this.matching.Id);
+  }
+
+  private async resolve() {
+    this.$store.commit('matching/setSolution', { id: this.matchingId, solution: [] });
+    await this.reconcile();
   }
 
   private getListOfIds(transactionIds: number[]): string {
