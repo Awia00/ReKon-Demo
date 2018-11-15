@@ -91,19 +91,19 @@ const actionTree: ActionTree<State, RootState> = {
         );
         commit('setSolution', { id: matchingId, solution: mappedSolution });
       }
-      const isFinished = await masterClient.getIsFinished(m.Guuid);
-      if (!isFinished) {
+      const isFinished = masterClient.getIsFinished(m.Guuid);
+      dispatch(
+        'account/markOpenItems',
+        {
+          accountIds: m.Accounts.map((x) => x.Id),
+          solution,
+        },
+        { root: true },
+      );
+      if (!await isFinished) {
         setTimeout(() => dispatch('syncSolution', matchingId), 2000);
       } else {
         commit('setMatchingState', { id: matchingId, mState: 'Finished' });
-        dispatch(
-          'account/markOpenItems',
-          {
-            accountIds: m.Accounts.map((x) => x.Id),
-            solution,
-          },
-          { root: true },
-        );
       }
     }
   },
