@@ -2,7 +2,9 @@ import Axios from 'axios';
 import { Account } from '@/models/Account';
 import SolutionDto from './dtos/SolutionDto';
 import TransactionDto from './dtos/TransactionDto';
+import InstanceDto from './dtos/InstanceDto';
 import { Matching } from '@/models/Matching';
+import RuleDto from './dtos/RuleDto';
 
 export class ReconciliationClient {
     private readonly host = `${process.env.VUE_APP_REKON_SERVER}:${
@@ -13,9 +15,12 @@ export class ReconciliationClient {
      */
     public async postInstance(matching: Matching): Promise<string> {
         try {
-            const instance = matching.Accounts.reduce((state: TransactionDto[], current: Account) => {
+            const transactions = matching.Accounts.reduce((state: TransactionDto[], current: Account) => {
                 return state.concat(this.convertAccount(current));
             }, []);
+            const merges = matching.Merges.map((x) => new RuleDto(x.From, x.To, x.Type));
+            const conflicts = matching.Conflicts.map((x) => new RuleDto(x.From, x.To, x.Type));
+            const instance = new InstanceDto(transactions, merges, conflicts);
             const { data }: { data: string } = await await Axios.post(`${this.host}instances`, instance);
             return data;
         } catch (error) {
