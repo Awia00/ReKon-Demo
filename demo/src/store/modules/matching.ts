@@ -12,6 +12,7 @@ import { ReconciliationClient } from '@/api/ReconciliationClient';
 import IdMap from '../IdMapper';
 import { Match } from '@/models/Match';
 import SolutionDto from '@/api/dtos/SolutionDto';
+import { Rule } from '@/models/Rule';
 
 export class State {
   public matchings: IdMap<MatchingModel> = {};
@@ -56,6 +57,26 @@ const mutationTree: MutationTree<State> = {
     { id, mState }: { id: string; mState: MatchingState },
   ) {
     state.matchings[id].State = mState;
+  },
+
+  // rules
+
+  addRule(state: State, { mId, rule }: { mId: string, rule: Rule}) {
+    if (rule.From === rule.To || !(rule.Type === 'Merge' || rule.Type === 'Conflict')) { return; }
+    if (rule.Type === 'Merge') {
+      state.matchings[mId].Merges.push(rule);
+    } else {
+      state.matchings[mId].Conflicts.push(rule);
+    }
+  },
+
+  removeRule(state: State, { mId, rule }: { mId: string, rule: Rule}) {
+    const m = state.matchings[mId];
+    if (rule.Type === 'Merge') {
+      m.Merges.splice(m.Merges.indexOf(rule), 1);
+    } else {
+      m.Conflicts.splice(m.Conflicts.indexOf(rule), 1);
+    }
   },
 };
 

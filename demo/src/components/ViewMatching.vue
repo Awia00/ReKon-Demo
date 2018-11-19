@@ -18,27 +18,32 @@
         <v-btn @click="resolve()">Resolve</v-btn>
       </div>
     </v-layout>
-    <v-flex @mouseout="clearActiveMatch()">
-      <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
-        <template slot="items" slot-scope="props">
-          <tr @mouseover="setActiveMatch(props.item)">
-            <td>{{ props.item.Id }}</td>
-            <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
-          </tr>
-        </template>
-        <template slot="footer">
-          <td colspan="100%">
-            <v-text-field
-              v-model="search"
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
-          </td>
-        </template>
-      </v-data-table>
-    </v-flex>
+    <v-layout row>
+      <v-flex @mouseout="clearActiveMatch()" class="table-wrapper">
+        <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
+          <template slot="items" slot-scope="props">
+            <tr @mouseover="setActiveMatch(props.item)">
+              <td>{{ props.item.Id }}</td>
+              <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
+            </tr>
+          </template>
+          <template slot="footer">
+            <td colspan="100%">
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
+            </td>
+          </template>
+        </v-data-table>
+      </v-flex>
+      <v-flex xs6 class="table-wrapper">
+        <ViewRules :matchingId="matchingId"></ViewRules>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
@@ -46,9 +51,15 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Matching as MatchingModel } from '../models/Matching';
 import { Match as MatchModel } from '../models/Match';
+import { Rule as RuleModel } from '../models/Rule';
 import { Transaction as TransactionModel } from '@/models/Transaction';
+import ViewRules from './ViewRules.vue';
 
-@Component({})
+@Component({
+  components: {
+    ViewRules,
+  },
+})
 export default class ViewMatching extends Vue {
   @Prop(String)
   private matchingId!: string;
@@ -65,6 +76,11 @@ export default class ViewMatching extends Vue {
 
   get matches(): MatchModel[] {
     const result = this.matching.Matches;
+    return result;
+  }
+
+  get rules(): RuleModel[] {
+    const result = this.matching.Merges.concat(this.matching.Conflicts);
     return result;
   }
 
@@ -105,4 +121,7 @@ export default class ViewMatching extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.table-wrapper {
+  padding: 5px;
+}
 </style>
