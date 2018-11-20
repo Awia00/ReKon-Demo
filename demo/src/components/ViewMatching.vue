@@ -1,25 +1,13 @@
 <template>
-  <v-container>
-    <v-layout row>
-      <h1>
-        <span v-once>{{matching.Title}}</span>
-        <v-btn icon @click="deleteMatching">
-          <v-icon>delete</v-icon>
-        </v-btn>
-      </h1>
-      <v-spacer></v-spacer>
-      <v-btn v-if="matching.State === 'Initial'" dark color="primary" @click="reconcile()">Reconcile</v-btn>
-      <div v-if="matching.State === 'Solving'">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <v-btn dark color="primary" @click="stop()">Stop</v-btn>
-      </div>
-      <div v-if="matching.State === 'Finished'" style="display: contents">
-        <h2 style="margin: 10px">Finished solving</h2>
-        <v-btn @click="resolve()">Resolve</v-btn>
-      </div>
-    </v-layout>
-    <v-layout row>
-      <v-flex @mouseout="clearActiveMatch()" class="table-wrapper">
+  <v-flex>
+    <v-layout row align-center justify-center>
+      <v-container @mouseout="clearActiveMatch()">
+        <h1>
+          <span v-once>{{matching.Title}}</span>
+          <v-btn icon @click="deleteMatching">
+            <v-icon>delete</v-icon>
+          </v-btn>
+        </h1>
         <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
           <template slot="items" slot-scope="props">
             <tr @mouseover="setActiveMatch(props.item)">
@@ -39,12 +27,29 @@
             </td>
           </template>
         </v-data-table>
-      </v-flex>
-      <v-flex xs6 class="table-wrapper">
+      </v-container>
+      <v-container>
+        <v-layout row>
+          <v-spacer></v-spacer>
+          <v-btn
+            v-if="matching.State === 'Initial'"
+            dark
+            color="primary"
+            @click="reconcile()"
+          >Reconcile</v-btn>
+          <div v-if="matching.State === 'Solving'">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <v-btn dark color="primary" @click="stop()">Stop</v-btn>
+          </div>
+          <div v-if="matching.State === 'Finished'" style="display: contents">
+            <h2 style="margin: 10px">Finished solving</h2>
+            <v-btn @click="resolve()">Resolve</v-btn>
+          </div>
+        </v-layout>
         <ViewRules :matchingId="matchingId"></ViewRules>
-      </v-flex>
+      </v-container>
     </v-layout>
-  </v-container>
+  </v-flex>
 </template>
 
 <script lang="ts">
@@ -121,7 +126,4 @@ export default class ViewMatching extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.table-wrapper {
-  padding: 5px;
-}
 </style>
