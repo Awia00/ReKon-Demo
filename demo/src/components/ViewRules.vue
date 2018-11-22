@@ -18,7 +18,7 @@
                     <v-text-field single-line hide-details label="From" v-model="from"></v-text-field>
                     <v-text-field single-line hide-details label="To" v-model="to"></v-text-field>
                     <v-select single-line hide-details :items="types" label="Type" v-model="type"></v-select>
-                    <v-btn @click="addRule()">Add</v-btn>
+                    <v-btn :disabled="!enabled" @click="addRule()">Add</v-btn>
                     <v-text-field
                         v-model="search"
                         append-icon="search"
@@ -36,14 +36,15 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Matching as MatchingModel } from '../models/Matching';
 import { Rule as RuleModel, ruleType, Rule } from '../models/Rule';
+import { isNumber } from 'util';
 
 @Component({})
 export default class ViewRules extends Vue {
 
     @Prop(String)
     public matchingId!: string;
-    private from: number | null = null;
-    private to: number | null = null;
+    private from: string = '';
+    private to: string = '';
     private type: ruleType | null = null;
 
     private types: string[] = ['Merge', 'Conflict'];
@@ -59,16 +60,23 @@ export default class ViewRules extends Vue {
         return result;
     }
 
+    get enabled(): boolean {
+        const fromCheck = !!this.from && !isNaN(Number(this.from));
+        const toCheck = !!this.to && !isNaN(Number(this.to));
+        const typeCheck = (this.type === 'Merge' || this.type === 'Conflict'); 
+        return fromCheck && toCheck && typeCheck;
+    }
+
     private headers = Object.keys(new RuleModel(0, 0, 'Merge')).map((prop) => {
         return { text: prop, value: prop };
     });
 
     private addRule() {
-        if (this.from !== null && this.to !== null && (this.type === 'Merge' || this.type === 'Conflict')) {
-            const rule = new RuleModel(this.from, this.to, this.type);
+        if (this.enabled) {
+            const rule = new RuleModel(parseInt(this.from!, 10), parseInt(this.to!, 10), this.type!);
             this.$store.commit('matching/addRule', { mId: this.matchingId, rule});
-            this.from = null;
-            this.to = null;
+            this.from = '';
+            this.to = '';
         }
     }
 
