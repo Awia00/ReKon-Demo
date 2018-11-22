@@ -1,6 +1,6 @@
 <template>
     <v-dialog scrollable v-model="show" max-width="600">
-        <v-card>
+        <v-card v-if="show">
             <v-toolbar dark color="primary">
                 <v-toolbar-title>Account</v-toolbar-title>
             </v-toolbar>
@@ -55,7 +55,7 @@ import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Match as MatchModel } from '@/models/Match';
 
 @Component({})
-export default class CreateRule extends Vue {
+export default class ViewMatch extends Vue {
     @Prop(MatchModel)
     public match!: MatchModel;
 
@@ -73,8 +73,11 @@ export default class CreateRule extends Vue {
 
     private marks: boolean[] = []; // update when transaction updates.
     get transactions(): TransactionModel[] {
+        if(!this.match) { 
+            return []; 
+        }
         const result = this.match.TransactionIds.map((x) => this.$store.state.Account.x);
-        return result;
+        return [];
     }
 
     private acceptMatch() {

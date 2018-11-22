@@ -11,7 +11,7 @@
           </h1>
           <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
             <template slot="items" slot-scope="props">
-              <tr @mouseover="setActiveMatch(props.item)">
+              <tr @click="showMatch(props.item)" @mouseover="setActiveMatch(props.item)">
                 <td>{{ props.item.Id }}</td>
                 <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
               </tr>
@@ -53,6 +53,7 @@
         </v-container>
       </v-flex>
     </v-layout>
+    <ViewMatch v-if="showMatchDialog" :show="showMatchDialog" :match="activeMatch"></ViewMatch>
   </v-flex>
 </template>
 
@@ -63,16 +64,20 @@ import { Match as MatchModel } from '../models/Match';
 import { Rule as RuleModel } from '../models/Rule';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import ViewRules from './ViewRules.vue';
+import ViewMatch from './ViewMatch.vue';
 
 @Component({
   components: {
     ViewRules,
+    ViewMatch,
   },
 })
 export default class ViewMatching extends Vue {
   @Prop(String)
   private matchingId!: string;
   private search: string = '';
+  private showMatchDialog: boolean = false;
+  private activeMatch: MatchModel | undefined;
 
   private headers = Object.keys(new MatchModel()).map((prop) => {
     return { text: prop, value: prop };
@@ -91,6 +96,11 @@ export default class ViewMatching extends Vue {
   get rules(): RuleModel[] {
     const result = this.matching.Merges.concat(this.matching.Conflicts);
     return result;
+  }
+
+  private showMatch(match: MatchModel) {
+    this.activeMatch = match;
+    this.showMatchDialog = true;
   }
 
   private async reconcile() {

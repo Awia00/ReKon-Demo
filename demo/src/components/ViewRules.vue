@@ -63,7 +63,7 @@ export default class ViewRules extends Vue {
     get enabled(): boolean {
         const fromCheck = !!this.from && !isNaN(Number(this.from));
         const toCheck = !!this.to && !isNaN(Number(this.to));
-        const typeCheck = (this.type === 'Merge' || this.type === 'Conflict'); 
+        const typeCheck = (this.type === 'Merge' || this.type === 'Conflict');
         return fromCheck && toCheck && typeCheck;
     }
 
