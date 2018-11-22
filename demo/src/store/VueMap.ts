@@ -1,7 +1,9 @@
 import Vue from 'vue';
+import { FunctionMapper } from 'vuex';
 
 interface VueMapStore<V> {
     [id: string]: V;
+    [id: number]: V;
 }
 
 export default class VueMap<V> implements Map<string, V> {
@@ -44,6 +46,18 @@ export default class VueMap<V> implements Map<string, V> {
         return this;
     }
 
+    public setAllIdFunc(list: V[], callbackfn: (value: V) => string): void {
+        list.forEach((value) => {
+            this.set(callbackfn(value), value);
+        });
+    }
+
+    public setAll(list: Array<{key: string, value: V}>) {
+        list.forEach(({key, value}) => {
+            this.set(key, value);
+        });
+    }
+
     public [Symbol.iterator](): IterableIterator<[string, V]> {
         return this.entries();
     }
@@ -79,5 +93,40 @@ export default class VueMap<V> implements Map<string, V> {
             }
         }
         return generator();
+    }
+
+    public map<U>(callbackfn: (value: V) => U, thisArg?: any): U[] {
+        const values = this.values();
+        let elem = values.next();
+        const result: U[] = [];
+        while (!elem.done) {
+            result.push(callbackfn(elem.value));
+            elem = values.next();
+        }
+        return result;
+    }
+
+    public filter(callbackfn: (value: V) => boolean, thisArg?: any): V[] {
+        const values = this.values();
+        let elem = values.next();
+        const result: V[] = [];
+        while (!elem.done) {
+            if (callbackfn(elem.value)) {
+                result.push(elem.value);
+            }
+            elem = values.next();
+        }
+        return result;
+    }
+
+    public reduce<T>(callbackfn: (previousValue: T, currentValue: V) => T, initialValue: T): T {
+        const values = this.values();
+        let elem = values.next();
+        let result: T = initialValue;
+        while (!elem.done) {
+            result = callbackfn(result, elem.value);
+            elem = values.next();
+        }
+        return result;
     }
 }

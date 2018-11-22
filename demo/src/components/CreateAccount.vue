@@ -284,7 +284,10 @@ export default class CreateAccount extends Vue {
   private async create() {
     await this.$store.dispatch(
       'account/addAccount',
-      new AccountModel(this.title, this.transactions, this.internal),
+      {
+        account: new AccountModel(this.title, this.transactions.map((x) => x.Id.toString()), this.internal),
+        transactions: this.transactions,
+      },
     );
 
     this.dialog = false;

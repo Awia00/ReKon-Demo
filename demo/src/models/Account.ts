@@ -5,15 +5,15 @@ export class Account {
 
     public Id: number;
     public Title: string;
-    public Transactions: Transaction[];
+    public TransactionIds: string[];
     public Internal: boolean;
 
     constructor();
-    constructor(title: string, transactions: Transaction[], internal: boolean);
-    constructor(title?: string, transactions?: Transaction[], internal?: boolean) {
+    constructor(title: string, transactions: string[], internal: boolean);
+    constructor(title?: string, transactions?: string[], internal?: boolean) {
         this.Id = Account.IdCounter++;
         this.Title = title !== undefined ? title : '';
-        this.Transactions = transactions !== undefined ? transactions : [];
+        this.TransactionIds = transactions !== undefined ? transactions : [];
         this.Internal = internal !== undefined ? internal : true;
     }
 }

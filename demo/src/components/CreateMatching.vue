@@ -62,7 +62,7 @@ export default class CreateMatching extends Vue {
   }
 
   private async create() {
-    const toSave = this.accounts.filter((a) => a.checked).map((a) => a.account);
+    const toSave = this.accounts.filter((a) => a.checked).map((a) => a.account.Id.toString());
     await this.$store.dispatch(
       'matching/addMatching',
       new MatchingModel(this.title, toSave, []),

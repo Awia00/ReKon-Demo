@@ -2,6 +2,8 @@ import Vue from 'vue';
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex';
 import { account } from './modules/account';
 import { matching } from './modules/matching';
+import { transaction } from './modules/transaction';
+import { match } from './modules/match';
 
 Vue.use(Vuex);
 
@@ -20,6 +22,8 @@ export default new Vuex.Store({
   modules: {
     account,
     matching,
+    match,
+    transaction,
   },
   state: new State(),
   getters: getterTree,

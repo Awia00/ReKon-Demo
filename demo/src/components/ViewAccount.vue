@@ -50,10 +50,10 @@ export default class ViewAccount extends Vue {
     return this.$store.getters['account/getAccount'](this.accountId);
   }
   get transactions() {
-    return this.account.Transactions;
+    return this.$store.getters['transaction/getTransactions'](this.account.TransactionIds);
   }
   get activeTransactions(): number[] {
-    return this.$store.state.account.activeTransactions;
+    return this.$store.state.transaction.activeTransactions;
   }
   private isActive(t: TransactionModel): boolean {
     return this.activeTransactions.find((x) => x === t.Id) !== undefined;

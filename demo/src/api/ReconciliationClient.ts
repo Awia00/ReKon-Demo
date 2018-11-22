@@ -13,14 +13,8 @@ export class ReconciliationClient {
     /**
      * Returns an Id for the instance
      */
-    public async postInstance(matching: Matching): Promise<string> {
+    public async postInstance(instance: InstanceDto): Promise<string> {
         try {
-            const transactions = matching.Accounts.reduce((state: TransactionDto[], current: Account) => {
-                return state.concat(this.convertAccount(current));
-            }, []);
-            const merges = matching.Merges.map((x) => new RuleDto(x.From, x.To, x.Type));
-            const conflicts = matching.Conflicts.map((x) => new RuleDto(x.From, x.To, x.Type));
-            const instance = new InstanceDto(transactions, merges, conflicts);
             const { data }: { data: string } = await await Axios.post(`${this.host}instances`, instance);
             return data;
         } catch (error) {
@@ -61,9 +55,5 @@ export class ReconciliationClient {
             console.error('(getSolution) Error from Server: ' + error);
             throw error;
         }
-    }
-
-    private convertAccount(account: Account): TransactionDto[]  {
-        return account.Transactions.map(((t) => new TransactionDto(t.Id, t.Value * (account.Internal ? 1 : -1))));
     }
 }

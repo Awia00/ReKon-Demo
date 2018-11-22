@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import {
   GetterTree,
   MutationTree,
@@ -14,6 +13,9 @@ import { Account as AccountModel } from '@/models/Account';
 import { Match } from '@/models/Match';
 import { Rule } from '@/models/Rule';
 import SolutionDto from '@/api/dtos/SolutionDto';
+import InstanceDto from '@/api/dtos/InstanceDto';
+import TransactionDto from '@/api/dtos/TransactionDto';
+import RuleDto from '@/api/dtos/RuleDto';
 
 export class State {
   public matchings: VueMap<MatchingModel> = new VueMap<MatchingModel>();
@@ -45,14 +47,13 @@ const mutationTree: MutationTree<State> = {
       m.Guuid = guuid;
     }
   },
-
   setSolution(
     state: State,
     { id, solution }: { id: string; solution: Match[] },
   ) {
     const m = state.matchings.get(id);
     if (m) {
-      m.Matches = solution;
+      m.MatchIds = solution.map((x) => x.Id);
     }
   },
 
@@ -102,41 +103,52 @@ const actionTree: ActionTree<State, RootState> = {
   },
 
   async reconcile(
-    { commit, state }: ActionContext<State, RootState>,
+    { commit, state, rootGetters }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
     const m = state.matchings.get(matchingId);
     if (m) {
-      const id: string = await masterClient.postInstance(m);
+      const accounts = rootGetters['account/getAccounts'](m.AccountIds);
+      const transactions = accounts.reduce((prev: TransactionDto[], curr: AccountModel) => {
+        return prev.concat(rootGetters['transaction/getTransactionDtos'](curr));
+      }, []);
+      const merges = m.Merges.map((x) => new RuleDto(x.From, x.To, x.Type));
+      const conflicts = m.Conflicts.map((x) => new RuleDto(x.From, x.To, x.Type));
+
+      const instance = new InstanceDto(transactions, merges, conflicts);
+      const id: string = await masterClient.postInstance(instance);
       commit('setGuuid', { id: matchingId, guuid: id });
       commit('setMatchingState', { id: matchingId, mState: 'Solving' });
     }
   },
 
   async syncSolution(
-    { commit, state, dispatch }: ActionContext<State, RootState>,
+    { commit, state, dispatch, rootGetters }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
     const m = state.matchings.get(matchingId);
     if (m && m.Guuid) {
       const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
-      if (m.Matches.length < solution.incumbent) {
+      if (m.MatchIds.length < solution.incumbent) {
         const mappedSolution = solution.matches.map(
           (match) => new Match(match.ids),
         );
+        commit('match/deleteMatches', m.MatchIds, { root: true });
+        commit('match/addMatches', mappedSolution, { root: true });
         commit('setSolution', { id: matchingId, solution: mappedSolution });
+        commit(
+          'transaction/markOpenItems',
+          {
+            accounts: rootGetters['account/getAccounts'](m.AccountIds),
+            solution,
+          },
+          { root: true },
+        );
       }
+
       const isFinished = masterClient.getIsFinished(m.Guuid);
-      dispatch(
-        'account/markOpenItems',
-        {
-          accountIds: m.Accounts.map((x: AccountModel) => x.Id),
-          solution,
-        },
-        { root: true },
-      );
       if (!await isFinished) {
-        setTimeout(() => dispatch('syncSolution', matchingId), 2000);
+        setTimeout(async () => await dispatch('syncSolution', matchingId), 2000);
       } else {
         commit('setMatchingState', { id: matchingId, mState: 'Finished' });
       }

@@ -9,12 +9,10 @@ import { State as RootState } from '../store';
 import { Account as AccountModel } from '@/models/Account';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import VueMap from '../VueMap';
-import SolutionDto from '@/api/dtos/SolutionDto';
 
 export class State {
   public accounts: VueMap<AccountModel> = new VueMap<AccountModel>();
   public accountIds: string[] = [];
-  public activeTransactions: number[] = [];
 }
 
 const getterTree: GetterTree<State, RootState> = {
@@ -25,6 +23,10 @@ const getterTree: GetterTree<State, RootState> = {
   getAccount: (state: State) => (id: string): AccountModel => {
     return state.accounts.get(id)!;
   },
+
+  getAccounts: (state: State) => (ids: string[]): AccountModel[] => {
+    return ids.map((x) => state.accounts.get(x)!);
+  },
 };
 
 const mutationTree: MutationTree<State> = {
@@ -32,41 +34,18 @@ const mutationTree: MutationTree<State> = {
     state.accounts.set(accountModel.Id.toString(), accountModel);
     state.accountIds.push(accountModel.Id.toString());
   },
-
-  markOpenItems(
-    state: State,
-    { accountIds, solution }: { accountIds: number[]; solution: SolutionDto },
-  ) {
-    const openItems = solution.openItems;
-    accountIds.forEach((index) => {
-      state.accounts.get(index.toString())!.Transactions.forEach((t: TransactionModel) => {
-        if (openItems.find((x) => x === t.Id) !== undefined) {
-          t.State = 'Open';
-        } else {
-          t.State = 'Closed';
-        }
-      });
-    });
-  },
-
-  setActiveTransactions(state: State, ids: number[]) {
-    state.activeTransactions = ids;
-  },
 };
 
 const actionTree: ActionTree<State, RootState> = {
   async addAccount(
     { commit }: ActionContext<State, RootState>,
-    accountModel: AccountModel,
+    payload: {
+      account: AccountModel,
+      transactions: TransactionModel[],
+    },
   ) {
-    commit('addAccount', accountModel);
-  },
-
-  async markOpenItems(
-    { commit }: ActionContext<State, RootState>,
-    { accountIds, solution }: { accountIds: number[]; solution: SolutionDto },
-  ) {
-    commit('markOpenItems', { accountIds, solution });
+    commit('addAccount', payload.account);
+    commit('transaction/addTransactions', payload.transactions, { root: true });
   },
 };
 
