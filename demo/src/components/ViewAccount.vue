@@ -47,7 +47,7 @@ export default class ViewAccount extends Vue {
   ];
 
   get account(): AccountModel {
-    return this.$store.state.account.accounts[this.accountId];
+    return this.$store.getters['account/getAccount'](this.accountId);
   }
   get transactions() {
     return this.account.Transactions;

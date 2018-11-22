@@ -9,73 +9,85 @@ import {
 import { State as RootState } from '../store';
 import { Matching as MatchingModel, MatchingState } from '@/models/Matching';
 import { ReconciliationClient } from '@/api/ReconciliationClient';
-import IdMap from '../IdMapper';
+import VueMap from '../VueMap';
+import { Account as AccountModel } from '@/models/Account';
 import { Match } from '@/models/Match';
-import SolutionDto from '@/api/dtos/SolutionDto';
 import { Rule } from '@/models/Rule';
+import SolutionDto from '@/api/dtos/SolutionDto';
 
 export class State {
-  public matchings: IdMap<MatchingModel> = {};
+  public matchings: VueMap<MatchingModel> = new VueMap<MatchingModel>();
   public matchingIds: string[] = [];
 }
 
 const getterTree: GetterTree<State, RootState> = {
   matchingSet(state: State): MatchingModel[] {
-    return state.matchingIds.map((x) => state.matchings[x]);
+    return state.matchingIds.map((x) => state.matchings.get(x)!);
   },
   getMatching: (state: State) => (id: string): MatchingModel => {
-    return state.matchings[id];
+    return state.matchings.get(id)!;
   },
 };
 
 const mutationTree: MutationTree<State> = {
   addMatching(state: State, matchingModel: MatchingModel) {
-    // Object.assign is neccesary for adding new fields for vuex to be reactive
-    state.matchings = Object.assign({}, state.matchings, {
-      [matchingModel.Id]: matchingModel,
-    });
+    state.matchings.set(matchingModel.Id.toString(), matchingModel);
     state.matchingIds.push(matchingModel.Id.toString());
   },
   removeMatching(state: State, matchingId: string) {
     const index = state.matchingIds.indexOf(matchingId);
-    Vue.delete(state.matchings, matchingId);
+    state.matchings.delete(matchingId);
     state.matchingIds.splice(index, 1);
   },
   setGuuid(state: State, { id, guuid }: { id: string; guuid: string }) {
-    state.matchings[id].Guuid = guuid;
+    const m = state.matchings.get(id);
+    if (m !== undefined) {
+      m.Guuid = guuid;
+    }
   },
 
   setSolution(
     state: State,
     { id, solution }: { id: string; solution: Match[] },
   ) {
-    state.matchings[id].Matches = solution;
+    const m = state.matchings.get(id);
+    if (m) {
+      m.Matches = solution;
+    }
   },
 
   setMatchingState(
     state: State,
     { id, mState }: { id: string; mState: MatchingState },
   ) {
-    state.matchings[id].State = mState;
+    const m = state.matchings.get(id);
+    if (m) {
+      m.State = mState;
+    }
   },
 
   // rules
 
   addRule(state: State, { mId, rule }: { mId: string, rule: Rule}) {
     if (rule.From === rule.To || !(rule.Type === 'Merge' || rule.Type === 'Conflict')) { return; }
+    const m = state.matchings.get(mId);
+    if (!m) { return; }
+
     if (rule.Type === 'Merge') {
-      state.matchings[mId].Merges.push(rule);
+      m.Merges.push(rule);
     } else {
-      state.matchings[mId].Conflicts.push(rule);
+      m.Conflicts.push(rule);
     }
   },
 
   removeRule(state: State, { mId, rule }: { mId: string, rule: Rule}) {
-    const m = state.matchings[mId];
-    if (rule.Type === 'Merge') {
-      m.Merges.splice(m.Merges.indexOf(rule), 1);
-    } else {
-      m.Conflicts.splice(m.Conflicts.indexOf(rule), 1);
+    const m = state.matchings.get(mId);
+    if (m) {
+      if (rule.Type === 'Merge') {
+        m.Merges.splice(m.Merges.indexOf(rule), 1);
+      } else {
+        m.Conflicts.splice(m.Conflicts.indexOf(rule), 1);
+      }
     }
   },
 };
@@ -93,18 +105,20 @@ const actionTree: ActionTree<State, RootState> = {
     { commit, state }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
-    const m = state.matchings[matchingId];
-    const id: string = await masterClient.postInstance(m);
-    commit('setGuuid', { id: matchingId, guuid: id });
-    commit('setMatchingState', { id: matchingId, mState: 'Solving' });
+    const m = state.matchings.get(matchingId);
+    if (m) {
+      const id: string = await masterClient.postInstance(m);
+      commit('setGuuid', { id: matchingId, guuid: id });
+      commit('setMatchingState', { id: matchingId, mState: 'Solving' });
+    }
   },
 
   async syncSolution(
     { commit, state, dispatch }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
-    const m = state.matchings[matchingId];
-    if (m.Guuid) {
+    const m = state.matchings.get(matchingId);
+    if (m && m.Guuid) {
       const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
       if (m.Matches.length < solution.incumbent) {
         const mappedSolution = solution.matches.map(
@@ -116,7 +130,7 @@ const actionTree: ActionTree<State, RootState> = {
       dispatch(
         'account/markOpenItems',
         {
-          accountIds: m.Accounts.map((x) => x.Id),
+          accountIds: m.Accounts.map((x: AccountModel) => x.Id),
           solution,
         },
         { root: true },
@@ -133,8 +147,8 @@ const actionTree: ActionTree<State, RootState> = {
     { commit, state }: ActionContext<State, RootState>,
     matchingId: string,
   ) {
-    const m = state.matchings[matchingId];
-    if (m.Guuid) {
+    const m = state.matchings.get(matchingId);
+    if (m && m.Guuid) {
       await masterClient.putIsFinished(m.Guuid);
       commit('setMatchingState', { id: matchingId, mState: 'Finished' });
     }

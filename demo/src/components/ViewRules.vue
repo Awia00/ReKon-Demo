@@ -50,7 +50,7 @@ export default class ViewRules extends Vue {
     private search: string = '';
 
     get matching(): MatchingModel {
-        const result = this.$store.state.matching.matchings[this.matchingId];
+        const result = this.$store.getters['matching/getMatching'](this.matchingId);
         return result;
     }
 
