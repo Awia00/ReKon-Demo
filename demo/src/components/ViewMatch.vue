@@ -1,6 +1,6 @@
 <template>
     <v-dialog scrollable v-model="show" max-width="600">
-        <v-card v-if="show">
+        <v-card>
             <v-toolbar dark color="primary">
                 <v-toolbar-title>Account</v-toolbar-title>
             </v-toolbar>
@@ -44,13 +44,15 @@
                 <v-btn color="accent" @click="makeConflict()">Make Conflict</v-btn>
                 <v-btn color="secondary" @click="makeMerge()">Make Merge</v-btn>
                 <v-btn color="primary" @click="acceptMatch()">Accept Match</v-btn>
+                <v-btn color="primary" @click="closeUp()">Close</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
+
 <script lang="ts">
-import { Prop, Component, Vue } from 'vue-property-decorator';
+import { Prop, Component, Vue, Watch } from 'vue-property-decorator';
 import { Transaction as TransactionModel } from '@/models/Transaction';
 import { Match as MatchModel } from '@/models/Match';
 
@@ -60,7 +62,11 @@ export default class ViewMatch extends Vue {
     public match!: MatchModel;
 
     @Prop(Boolean)
-    public show!: boolean;
+    public showMatchDialog!: boolean;
+
+    private search: string = '';
+    private show: boolean = false;
+    private marks: boolean[] = []; // update when transaction updates.
 
     private headers = [
         { text: 'Mark', value: 'Mark'},
@@ -71,12 +77,23 @@ export default class ViewMatch extends Vue {
         { text: 'State', value: 'State' },
     ];
 
-    private marks: boolean[] = []; // update when transaction updates.
-    get transactions(): TransactionModel[] {
-        if(!this.match) { 
-            return []; 
+    @Watch('showMatchDialog')
+    private showMatchDialogChange(newVal: boolean, oldVal: boolean) {
+        this.show = newVal;
+    }
+
+    @Watch('show')
+    private showChange(newVal: boolean, oldVal: boolean) {
+        if(!newVal) {
+            this.$emit('update:showMatchDialog', false);
         }
-        const result = this.match.TransactionIds.map((x) => this.$store.state.Account.x);
+    }
+
+    get transactions(): TransactionModel[] {
+        if (!this.match) {
+            return [];
+        }
+        const result = this.$store.getters['transaction/getTransactions'](this.match.TransactionIds);
         return [];
     }
 

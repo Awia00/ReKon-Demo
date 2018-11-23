@@ -53,7 +53,7 @@
         </v-container>
       </v-flex>
     </v-layout>
-    <ViewMatch v-if="showMatchDialog" :show="showMatchDialog" :match="activeMatch"></ViewMatch>
+    <ViewMatch :showMatchDialog.sync="showMatchDialog" :match="activeMatch"></ViewMatch>
   </v-flex>
 </template>
 
