@@ -69,6 +69,7 @@
           <ViewMatching v-bind:matchingId="matchings[0]"/>
         </v-flex>
       </v-layout>
+      <Error></Error>
     </v-content>
   </v-app>
 </template>
@@ -79,6 +80,7 @@ import CreateAccount from '@/components/CreateAccount.vue';
 import ViewAccount from '@/components/ViewAccount.vue';
 import CreateMatching from '@/components/CreateMatching.vue';
 import ViewMatching from '@/components/ViewMatching.vue';
+import Error from '@/components/Error.vue';
 import { Account as AccountModel } from '@/models/Account';
 import { Matching as MatchingModel } from '@/models/Matching';
 import { Transaction } from '@/models/Transaction';
@@ -90,6 +92,7 @@ import { setTimeout, setInterval, clearInterval } from 'timers';
     ViewAccount,
     CreateMatching,
     ViewMatching,
+    Error,
   },
 })
 export default class App extends Vue {

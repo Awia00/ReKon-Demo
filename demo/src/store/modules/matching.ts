@@ -113,17 +113,21 @@ const actionTree: ActionTree<State, RootState> = {
   ) {
     const m = state.matchings.get(matchingId);
     if (m) {
-      const accounts = rootGetters['account/getAccounts'](m.AccountIds);
-      const transactions = accounts.reduce((prev: TransactionDto[], curr: AccountModel) => {
-        return prev.concat(rootGetters['transaction/getTransactionDtos'](curr));
-      }, []);
-      const merges = m.Merges.map((x) => new RuleDto(x.From, x.To, x.Type));
-      const conflicts = m.Conflicts.map((x) => new RuleDto(x.From, x.To, x.Type));
+      try {
+        const accounts = rootGetters['account/getAccounts'](m.AccountIds);
+        const transactions = accounts.reduce((prev: TransactionDto[], curr: AccountModel) => {
+          return prev.concat(rootGetters['transaction/getTransactionDtos'](curr));
+        }, []);
+        const merges = m.Merges.map((x) => new RuleDto(x.From, x.To, x.Type));
+        const conflicts = m.Conflicts.map((x) => new RuleDto(x.From, x.To, x.Type));
 
-      const instance = new InstanceDto(transactions, merges, conflicts);
-      const id: string = await masterClient.postInstance(instance);
-      commit('setGuuid', { id: matchingId, guuid: id });
-      commit('setMatchingState', { id: matchingId, mState: 'Solving' });
+        const instance = new InstanceDto(transactions, merges, conflicts);
+        const id: string = await masterClient.postInstance(instance);
+        commit('setGuuid', { id: matchingId, guuid: id });
+        commit('setMatchingState', { id: matchingId, mState: 'Solving' });
+      } catch (error) {
+        commit('ui/setError', error, { root: true});
+      }
     }
   },
 
@@ -133,29 +137,33 @@ const actionTree: ActionTree<State, RootState> = {
   ) {
     const m = state.matchings.get(matchingId);
     if (m && m.Guuid) {
-      const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
-      if (m.MatchIds.length < solution.incumbent) {
-        const mappedSolution = solution.matches.map(
-          (match) => new Match(matchingId, match.ids),
-        );
-        commit('match/deleteMatches', m.MatchIds, { root: true });
-        commit('match/addMatches', mappedSolution, { root: true });
-        commit('setSolution', { id: matchingId, solution: mappedSolution });
-        commit(
-          'transaction/markOpenItems',
-          {
-            accounts: rootGetters['account/getAccounts'](m.AccountIds),
-            solution,
-          },
-          { root: true },
-        );
-      }
+      try {
+        const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
+        if (m.MatchIds.length < solution.incumbent) {
+          const mappedSolution = solution.matches.map(
+            (match) => new Match(matchingId, match.ids),
+          );
+          commit('match/deleteMatches', m.MatchIds, { root: true });
+          commit('match/addMatches', mappedSolution, { root: true });
+          commit('setSolution', { id: matchingId, solution: mappedSolution });
+          commit(
+            'transaction/markOpenItems',
+            {
+              accounts: rootGetters['account/getAccounts'](m.AccountIds),
+              solution,
+            },
+            { root: true },
+          );
+        }
 
-      const isFinished = masterClient.getIsFinished(m.Guuid);
-      if (!await isFinished) {
-        setTimeout(async () => await dispatch('syncSolution', matchingId), 2000);
-      } else {
-        commit('setMatchingState', { id: matchingId, mState: 'Finished' });
+        const isFinished = masterClient.getIsFinished(m.Guuid);
+        if (!await isFinished) {
+          setTimeout(async () => await dispatch('syncSolution', matchingId), 2000);
+        } else {
+          commit('setMatchingState', { id: matchingId, mState: 'Finished' });
+        }
+      } catch (error) {
+        commit('ui/setError', error, { root: true});
       }
     }
   },

@@ -4,6 +4,7 @@ import { account } from './modules/account';
 import { matching } from './modules/matching';
 import { transaction } from './modules/transaction';
 import { match } from './modules/match';
+import { ui } from './modules/ui';
 
 Vue.use(Vuex);
 
@@ -24,6 +25,7 @@ export default new Vuex.Store({
     matching,
     match,
     transaction,
+    ui,
   },
   state: new State(),
   getters: getterTree,
