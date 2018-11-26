@@ -74,10 +74,15 @@ const mutationTree: MutationTree<State> = {
     const m = state.matchings.get(mId);
     if (!m) { return; }
 
+    // validate that merges and conflicts are valid.
     if (rule.Type === 'Merge') {
-      m.Merges.push(rule);
+      if (m.Merges.find((x) => x.equals(rule)) === undefined) {
+        m.Merges.push(rule);
+      }
     } else {
-      m.Conflicts.push(rule);
+      if (m.Conflicts.find((x) => x.equals(rule)) === undefined) {
+        m.Conflicts.push(rule);
+      }
     }
   },
 
@@ -131,7 +136,7 @@ const actionTree: ActionTree<State, RootState> = {
       const solution: SolutionDto = await masterClient.getSolution(m.Guuid);
       if (m.MatchIds.length < solution.incumbent) {
         const mappedSolution = solution.matches.map(
-          (match) => new Match(match.ids),
+          (match) => new Match(matchingId, match.ids),
         );
         commit('match/deleteMatches', m.MatchIds, { root: true });
         commit('match/addMatches', mappedSolution, { root: true });

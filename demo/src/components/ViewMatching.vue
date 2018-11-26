@@ -77,9 +77,9 @@ export default class ViewMatching extends Vue {
   private matchingId!: string;
   private search: string = '';
   private showMatchDialog: boolean = false;
-  private activeMatch: MatchModel | undefined;
+  private activeMatch: MatchModel | null = null;
 
-  private headers = Object.keys(new MatchModel()).map((prop) => {
+  private headers = Object.keys(new MatchModel(this.matchingId)).map((prop) => {
     return { text: prop, value: prop };
   });
 
@@ -100,6 +100,9 @@ export default class ViewMatching extends Vue {
 
   private showMatch(match: MatchModel) {
     this.activeMatch = match;
+    if (this.showMatchDialog) {
+      this.showMatchDialog = false;
+    }
     this.showMatchDialog = true;
   }
 

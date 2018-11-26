@@ -9,4 +9,10 @@ export class Rule {
         this.To = to;
         this.Type = type;
     }
+
+    public equals(o: Rule) {
+        return this.Type === o.Type && (
+            (this.From === o.From && this.To === o.To) ||
+            (this.From === o.To && this.To === o.From));
+    }
 }
