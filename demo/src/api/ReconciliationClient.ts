@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import Axios, { AxiosError } from 'axios';
 import SolutionDto from './dtos/SolutionDto';
 import InstanceDto from './dtos/InstanceDto';
 
@@ -15,7 +15,7 @@ export class ReconciliationClient {
             const { data }: { data: string } = await response;
             return data;
         } catch (error) {
-            throw error;
+            throw await this.extractError(error);
         }
     }
 
@@ -25,7 +25,7 @@ export class ReconciliationClient {
             const { data }: { data: boolean } = await response;
             return data;
         } catch (error) {
-            throw error;
+            throw await this.extractError(error);
         }
     }
 
@@ -34,7 +34,7 @@ export class ReconciliationClient {
             const response = await Axios.put(`${this.host}instances/${guid}/finished`);
             await response;
         } catch (error) {
-            throw error;
+            throw await this.extractError(error);
         }
     }
 
@@ -45,7 +45,14 @@ export class ReconciliationClient {
             const { data }: { data: SolutionDto } = await response;
             return data;
         } catch (error) {
-            throw error;
+            throw await this.extractError(error);
         }
+    }
+
+    private async extractError(error: Promise<AxiosError>): Promise<AxiosError> {
+        const e = await error;
+        const extra = e.response ? ': ' + e.response.data : '';
+        e.message += extra;
+        return e;
     }
 }

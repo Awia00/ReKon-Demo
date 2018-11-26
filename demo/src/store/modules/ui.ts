@@ -5,6 +5,7 @@ import {
     Module,
   } from 'vuex';
 import { State as RootState } from '../store';
+import Axios from 'axios';
 
 export class State {
     public errorMessage: string = '';
