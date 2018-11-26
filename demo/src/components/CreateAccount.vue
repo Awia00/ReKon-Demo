@@ -94,7 +94,6 @@
               <div v-if="type==='Upload'">
                 <h2>Upload</h2>
                 <!--v-if for destroy + rebuild fileupload hack-->
-
                 <FileUpload v-if="dialog" v-on:fileResult="fileResult($event)"/>
               </div>
             </v-flex>
@@ -172,10 +171,15 @@ export default class CreateAccount extends Vue {
   private freeform: string = '';
 
   // METHODS
-  private async fileResult(data: any[]) {
-    this.transactions = data.map((dp) => {
-      return TransactionModel.parse(dp);
-    });
+  private fileResult({title, data}: {title: string, data: any[]}) {
+    if (!this.title) {
+      this.title = title;
+    }
+    this.transactions = this.mapCSVTransactions(data);
+  }
+
+  private mapCSVTransactions(data: any[]): TransactionModel[] {
+    return data.map((dp) => TransactionModel.parse(dp));
   }
 
   private getDateFromNumber(input: string) {
@@ -242,7 +246,7 @@ export default class CreateAccount extends Vue {
   private async freeformChange(newVal: string, oldVal: string) {
     const csvResult = await this.parsePromise(newVal);
     if (csvResult.errors.length === 0) {
-      this.fileResult(csvResult.data);
+      this.transactions = this.mapCSVTransactions(csvResult.data);
       return;
     }
     const algoResult = this.algoFormatRead(newVal);

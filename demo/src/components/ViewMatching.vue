@@ -79,9 +79,7 @@ export default class ViewMatching extends Vue {
   private showMatchDialog: boolean = false;
   private activeMatch: MatchModel | null = null;
 
-  private headers = Object.keys(new MatchModel(this.matchingId)).map((prop) => {
-    return { text: prop, value: prop };
-  });
+  private headers = [{ text: 'Id', value: 'Id' }, { text: 'Transaction Ids', value: 'TransactionIds' }];
 
   get matching(): MatchingModel {
     const result = this.$store.getters['matching/getMatching'](this.matchingId);

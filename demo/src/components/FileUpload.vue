@@ -71,7 +71,7 @@ export default class FileUpload extends Vue {
   private fileParsed(results: Papa.ParseResult, file: File) {
     if (results.errors.length === 0) {
       this.status = 'STATUS_SUCCESS';
-      this.$emit('fileResult', results.data);
+      this.$emit('fileResult', { title: file.name, data: results.data});
     } else {
       this.status = 'STATUS_FAILED';
       this.error = results.errors[0].message;
