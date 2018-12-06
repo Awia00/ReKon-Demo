@@ -3,7 +3,7 @@
     <h1>{{account.Title}}</h1>
     <v-data-table :headers="headers" :items="transactions" :search="search" class="elevation-1">
       <template slot="items" slot-scope="props">
-        <tr v-bind:class="{'open': props.item.State === 'Open', 'active': isActive(props.item)}">
+        <tr v-bind:class="{'open': isOpen(props.item), 'active': isActive(props.item)}">
           <td>{{ props.item.Id }}</td>
           <td>{{ props.item.Value }}</td>
           <td v-if="props.item.Date">{{ props.item.Date.toDateString()}}</td>
@@ -50,7 +50,9 @@ export default class ViewAccount extends Vue {
     return this.$store.getters['account/getAccount'](this.accountId);
   }
   get transactions() {
-    return this.$store.getters['transaction/getTransactions'](this.account.TransactionIds);
+    return this.$store.getters['transaction/getTransactions'](
+      this.account.TransactionIds,
+    );
   }
   get activeTransactions(): number[] {
     return this.$store.state.transaction.activeTransactions;
@@ -58,14 +60,18 @@ export default class ViewAccount extends Vue {
   private isActive(t: TransactionModel): boolean {
     return this.activeTransactions.find((x) => x === t.Id) !== undefined;
   }
+
+  private isOpen(t: TransactionModel): boolean {
+    return t.State === 'Open';
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .open {
-  background-color: #ffb3b3;
+  background-color: var(--v-error-lighten3);
 }
 .active {
-  background-color: #ccffcc;
+  background-color: var(--v-success-lighten3);
 }
 </style>

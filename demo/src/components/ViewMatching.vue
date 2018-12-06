@@ -11,9 +11,14 @@
           </h1>
           <v-data-table :headers="headers" :items="matches" :search="search" class="elevation-1">
             <template slot="items" slot-scope="props">
-              <tr @click="showMatch(props.item)" @mouseover="setActiveMatch(props.item)">
+              <tr
+                @click="showMatch(props.item)"
+                @mouseover="setActiveMatch(props.item)"
+                v-bind:class="{'rejected': props.item.MatchState === 'Rejected', 'accepted': checkAccepted(props.item)}"
+              >
                 <td>{{ props.item.Id }}</td>
                 <td>{{ getListOfIds(props.item.TransactionIds) }}</td>
+                <td>{{ props.item.MatchState }}</td>
               </tr>
             </template>
             <template slot="footer">
@@ -48,6 +53,10 @@
               <h2 style="margin: 10px">Finished solving</h2>
               <v-btn @click="resolve()">Resolve</v-btn>
             </div>
+            <div v-if="matching.State === 'Failed'" style="display: contents">
+              <h2 style="margin: 10px">Failed...</h2>
+              <v-btn @click="resolve()">Resolve</v-btn>
+            </div>
           </v-layout>
           <ViewRules :matchingId="matchingId"></ViewRules>
         </v-container>
@@ -79,7 +88,11 @@ export default class ViewMatching extends Vue {
   private showMatchDialog: boolean = false;
   private activeMatch: MatchModel | null = null;
 
-  private headers = [{ text: 'Id', value: 'Id' }, { text: 'Transaction Ids', value: 'TransactionIds' }];
+  private headers = [
+    { text: 'Id', value: 'Id' },
+    { text: 'Transaction Ids', value: 'TransactionIds' },
+    { text: 'State', value: 'MatchState' },
+  ];
 
   get matching(): MatchingModel {
     const result = this.$store.getters['matching/getMatching'](this.matchingId);
@@ -87,7 +100,9 @@ export default class ViewMatching extends Vue {
   }
 
   get matches(): MatchModel[] {
-    const result = this.$store.getters['match/getMatches'](this.matching.MatchIds);
+    const result = this.$store.getters['match/getMatches'](
+      this.matching.AcceptedMatches.concat(this.matching.MatchIds),
+    );
     return result;
   }
 
@@ -110,11 +125,10 @@ export default class ViewMatching extends Vue {
   }
 
   private async stop() {
-    this.$store.dispatch('matching/stopSolving', this.matching.Id);
+    await this.$store.dispatch('matching/stopSolving', this.matching.Id);
   }
 
   private async resolve() {
-    this.$store.commit('matching/setSolution', { id: this.matchingId, solution: [] });
     await this.reconcile();
   }
 
@@ -135,10 +149,27 @@ export default class ViewMatching extends Vue {
   }
 
   private setActiveMatch(match: MatchModel) {
-    this.$store.commit('transaction/setActiveTransactions', match.TransactionIds);
+    this.$store.commit(
+      'transaction/setActiveTransactions',
+      match.TransactionIds,
+    );
+  }
+
+  // Making the check inline html makes the view not update class on resolve.
+  // therefore its placed in this method instead.
+  private checkAccepted(match: MatchModel) {
+    const result = match.MatchState === 'Accepted';
+    console.log(match.Id + ' ' + match.MatchState);
+    return result;
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.rejected {
+  background-color: var(--v-error-lighten3);
+}
+.accepted {
+  background-color: var(--v-success-lighten3);
+}
 </style>
