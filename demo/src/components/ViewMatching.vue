@@ -159,7 +159,6 @@ export default class ViewMatching extends Vue {
   // therefore its placed in this method instead.
   private checkAccepted(match: MatchModel) {
     const result = match.MatchState === 'Accepted';
-    console.log(match.Id + ' ' + match.MatchState);
     return result;
   }
 }
