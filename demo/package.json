@@ -12,7 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "moment": "^2.22.2",
-    "papaparse": "^4.6.1",
+    "papaparse": "^5.0.0",
     "register-service-worker": "^1.0.0",
     "vue": "^2.5.17",
     "vue-class-component": "^7.0.1",
