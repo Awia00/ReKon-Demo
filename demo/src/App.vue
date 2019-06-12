@@ -11,7 +11,7 @@
         <h3 slot="activator" class="font-weight-light">[Demo Build]</h3>
         <span>
           Interested in more? Contact us at
-          <b>awis@itu.dk</b>
+          <b>anders-wind@outlook.com</b>
         </span>
       </v-tooltip>
     </v-toolbar>
