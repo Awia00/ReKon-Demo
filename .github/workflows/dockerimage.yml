@@ -11,4 +11,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build demo --file demo/Dockerfile demo --tag resolved-demo:$(date +%s)
+      run: docker build --file demo/Dockerfile --tag resolved-demo:$(date +%s) demo
