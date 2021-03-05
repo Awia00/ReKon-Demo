@@ -35,7 +35,7 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
     "ts-jest": "^24.0.0",
-    "typescript": "^3.0.0",
+    "typescript": "^4.2.3",
     "vue-cli-plugin-vuetify": "^0.6.1",
     "vue-template-compiler": "^2.5.17",
     "vuetify-loader": "^1.0.5"
